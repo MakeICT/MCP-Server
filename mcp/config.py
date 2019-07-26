@@ -11,8 +11,15 @@ class Config:
         or 'sqlite:///' + os.path.join(basedir, 'site.db')
         # 'sqlite:///site.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('EMAIL_USER')
     MAIL_PASSWORD = os.environ.get('EMAIL_PASS')
+
+    # Shown in email templates and page footers
+    USER_APP_NAME = "Makerspace Control Program"
+    USER_ENABLE_EMAIL = True      # Enable email authentication
+    USER_ENABLE_USERNAME = True    # Enable username authentication
+    USER_REQUIRE_RETYPE_PASSWORD = True
+    USER_EMAIL_SENDER_EMAIL = ""
