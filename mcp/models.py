@@ -2,9 +2,9 @@ from mcp import db
 
 
 class BaseModel(db.Model):
-    '''
-        A base for all database models to implement common requirements.
-    '''
+    """
+    A base for all database models to implement common requirements.
+    """
     __abstract__ = True
 
     id = db.Column(db.Integer, primary_key=True)

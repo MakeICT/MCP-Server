@@ -15,9 +15,11 @@ from mcp.models import BaseModel
 
 
 class User(BaseModel, UserMixin):
-    '''
-        Basic user for login and information tracking.
-    '''
+    """
+    Basic user for login and information tracking.
+    """
+    __tablename__ = 'user'
+
     username = db.Column(db.String(20), unique=True,
                          nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -50,17 +52,23 @@ class User(BaseModel, UserMixin):
         return User.query.get(user_id)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}', \
-                '{self.image_file}', '{self.join_date}')"
+        return(f"User('{self.username}', '{self.email}', "
+               f"'{self.image_file}', '{self.join_date}')")
 
 
 class Role(db.Model):
+    """
+    Roles for granting granular access to users.
+    """
     __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(50), unique=True)
 
 
 class UserRoles(db.Model):
+    """
+    Links users to their roles.
+    """
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id',
