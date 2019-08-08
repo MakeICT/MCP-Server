@@ -18,7 +18,6 @@ mail = Mail()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    migrate = Migrate(app, db)
     app.config.from_object(Config)
 
     db.init_app(app)
@@ -32,5 +31,7 @@ def create_app(config_class=Config):
     app.register_blueprint(users)
     app.register_blueprint(main)
     app.register_blueprint(errors)
+
+    migrate = Migrate(app, db)
 
     return app
