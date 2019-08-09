@@ -31,6 +31,7 @@ class User(BaseModel, UserMixin):
                            default='default.jpg')
     password = db.Column(db.String(60), nullable=False, server_default='')
     join_date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime)
 
     active = db.Column('is_active', db.Boolean(), nullable=False,
                        server_default='1')
