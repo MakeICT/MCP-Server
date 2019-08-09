@@ -23,6 +23,7 @@ class Config:
     MAIL_USERNAME = settings.get('email', 'username')
     MAIL_PASSWORD = settings.get('email', 'password')
     MAIL_USE_TLS = True
+    ADMINS = settings.get('email', 'admins')
 
     # Shown in email templates and page footers
     USER_APP_NAME = settings.get('general', 'app_name')
