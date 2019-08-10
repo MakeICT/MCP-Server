@@ -31,3 +31,6 @@ class Config:
     USER_ENABLE_EMAIL = True      # Enable email authentication
     USER_ENABLE_USERNAME = True    # Enable username authentication
     USER_REQUIRE_RETYPE_PASSWORD = True
+    USER_LOGIN_URL = '/login'
+    USER_REGISTER_URL = '/register'
+    USER_LOGOUT_URL = '/logout'
