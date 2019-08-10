@@ -4,11 +4,15 @@
             {% if not label %}{% set label=field.label.text %}{% endif %}
             <label for="{{ field.id }}" class="control-label">{{ label|safe }}</label>
         {% endif %}
-        {{ field(class_='form-control', **kwargs) }}
         {% if field.errors %}
-            {% for e in field.errors %}
-                <p class="help-block">{{ e }}</p>
-            {% endfor %}
+            {{ field(class_='form-control is-invalid', **kwargs) }}
+            <div class="invalid-feedback">
+                {% for e in field.errors %}
+                    <p>{{ e }}</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            {{ field(class_='form-control', **kwargs) }}
         {% endif %}
     </div>
 {%- endmacro %}
