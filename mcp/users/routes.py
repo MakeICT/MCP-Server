@@ -29,13 +29,12 @@ def register():
 @users.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('users.account'))
     return redirect(Config.USER_LOGIN_URL)
 
 
 @users.route("/logout")
 def logout():
-    logout_user()
     return redirect(url_for('main.home'))
 
 

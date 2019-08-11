@@ -7,7 +7,7 @@ main = Blueprint('main', __name__)
 @main.route("/home")
 def home():
     page = request.args.get('page', 1, type=int)
-    return redirect(url_for('users.account'))
+    return render_template('home.html')
 
 
 @main.route("/about")
