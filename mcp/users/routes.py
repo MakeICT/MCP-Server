@@ -1,5 +1,5 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
-from flask_login import login_user, current_user, logout_user, login_required
+from flask_user import (roles_required, login_required, current_user)
 from datetime import datetime
 
 from mcp import db, bcrypt
@@ -102,3 +102,16 @@ def reset_token(token):
         return redirect(url_for('users.login'))
     return render_template('reset_token.html', title='Reset Password',
                            form=form)
+
+
+@users.route("/admin/users")
+@roles_required("admin")
+def adm_users():
+    page = request.args.get('page', 1, type=int)
+    users = User.query.order_by(User.last_name.asc()).paginate(page, 10, False)
+    next_url = url_for('users.adm_users', page=users.next_num) \
+        if users.has_next else None
+    prev_url = url_for('users.adm_users', page=users.prev_num) \
+        if users.has_prev else None
+    return render_template('users_admin_page.html', users=users.items,
+                           next_url=next_url, prev_url=prev_url)

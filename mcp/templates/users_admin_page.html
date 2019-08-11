@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="content-section">
+    <div class="d-flex justify-content-between">
+      {% if prev_url %}
+        <a class="btn btn-small btn-primary p-0 px-2 m-0" href="{{ prev_url }}">
+          <i class="fas fa-caret-left"></i>
+        </a>
+      {% else %}
+        <div></div>
+      {% endif %}
+      {% if next_url %}
+        <a class="btn btn-small btn-primary p-0 px-2 m-0" href="{{ next_url }}">
+          <i class="fas fa-caret-right"></i>
+        </a>
+      {% endif %}
+    </div>
+
+    {% for user in users %}
+       <div class="card">
+          <div class="card-body p-0 pl-2 py-1 m-0">
+            <div class="card-title p-0 m-0">
+              {% for role in user.roles %}
+                {% if role.name == 'admin' %}
+                  <i class="fas fa-shield-alt"></i>
+                {% endif %}
+              {% endfor %}
+              <b>{{user.last_name}}, {{ user.first_name }}</b>: <a class="text-muted"> {{user.email}}</a>
+            </div>
+            <hr class="p-0 m-0">
+            <div class="card-text">
+              active: {{ user.active}}
+            </div>
+         </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock content %}
