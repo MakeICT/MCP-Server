@@ -1,7 +1,7 @@
 {% extends 'flask_user/_public_base.html' %}
 
 {% block content %}
-{% from "flask_user/_macros.html" import render_field, render_checkbox_field, render_submit_field %}
+{% from "flask_user/_macros.html" import render_field, render_checkbox_field, render_submit_field, render_field_errors %}
 <h1>{%trans%}Sign in{%endtrans%}</h1>
 <hr/>
 
@@ -23,12 +23,7 @@
                 {% endif %}
             </div>
         </div>
-        {{ field(class_='form-control', tabindex=110) }}
-        {% if field.errors %}
-            {% for e in field.errors %}
-                <p class="help-block">{{ e }}</p>
-            {% endfor %}
-        {% endif %}
+        {{ render_field_errors(field) }}
     </div>
 
     {# Password field #}
@@ -46,12 +41,7 @@
                 {% endif %}
             </div>
         </div>
-        {{ field(class_='form-control', tabindex=120) }}
-        {% if field.errors %}
-            {% for e in field.errors %}
-                <p class="help-block">{{ e }}</p>
-            {% endfor %}
-        {% endif %}
+        {{ render_field_errors(field) }}
     </div>
 
     {# Remember me #}

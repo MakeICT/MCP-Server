@@ -4,18 +4,23 @@
             {% if not label %}{% set label=field.label.text %}{% endif %}
             <label for="{{ field.id }}" class="control-label">{{ label|safe }}</label>
         {% endif %}
-        {% if field.errors %}
-            {{ field(class_='form-control is-invalid', **kwargs) }}
-            <div class="invalid-feedback">
-                {% for e in field.errors %}
-                    <p>{{ e }}</p>
-                {% endfor %}
-            </div>
-        {% else %}
-            {{ field(class_='form-control', **kwargs) }}
-        {% endif %}
+        {% call render_field_errors(field) %} {% endcall %}
     </div>
 {%- endmacro %}
+
+{% macro render_field_errors(field) %}
+    {% if field.errors %}
+        {{ field(class_='form-control is-invalid', **kwargs) }}
+        <div class="invalid-feedback">
+            {% for e in field.errors %}
+                <p>{{ e }}</p>
+            {% endfor %}
+        </div>
+    {% else %}
+        {{ field(class_='form-control', **kwargs) }}
+    {% endif %}
+{% endmacro %}
+}
  
 {% macro render_checkbox_field(field, label=None) -%}
     {% if not label %}{% set label=field.label.text %}{% endif %}

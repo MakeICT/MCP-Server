@@ -1,7 +1,7 @@
 {% extends 'flask_user/_public_base.html' %}
 
 {% block content %}
-{% from "flask_user/_macros.html" import render_field, render_submit_field %}
+{% from "flask_user/_macros.html" import render_field, render_submit_field, render_field_errors %}
 <h1>{%trans%}Register{%endtrans%}</h1>
 <hr/>
 
@@ -23,16 +23,7 @@
                 {% endif %}
             </div>
         </div>
-        {% if field.errors %}
-            {{ field(class_='form-control is-invalid', tabindex=210) }}
-            <div class="invalid-feedback">
-                {% for e in field.errors %}
-                    <p>{{ e }}</p>
-                {% endfor %}
-            </div>
-        {% else %}
-            {{ field(class_='form-control', tabindex=210) }}
-        {% endif %}
+        {{ render_field_errors(field) }}
     </div>
 
     {% if user_manager.USER_ENABLE_EMAIL and user_manager.USER_ENABLE_USERNAME %}
