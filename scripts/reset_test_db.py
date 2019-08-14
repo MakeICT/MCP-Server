@@ -48,8 +48,9 @@ def Reset():
     db.session.add(admin_role)
 
     admin = User(first_name="Ryan", last_name="Fisher",
-                 email="testuser+admin@makeict.org", username="Ryan_Admin",
+                 email="testuser+admin@makeict.org", username="admin",
                  email_confirmed_at=datetime.utcnow(), roles=[admin_role])
+    admin.set_password('admin')
     db.session.add(admin)
 
     db.session.commit()
