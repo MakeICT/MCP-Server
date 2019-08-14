@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_user import (roles_required, login_required, current_user)
 from datetime import datetime
 
-from mcp import db, bcrypt
+from mcp import db
 from mcp.users.models import User
 from mcp.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                              RequestResetForm, ResetPasswordForm)
@@ -92,9 +92,7 @@ def reset_token(token):
         return redirect(url_for('users.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data) \
-                                .decode('utf-8')
-        user.password = hashed_password
+        user.set_password(form.password.data)
         db.session.commit()
         flash('Your password has been updated! You are now able to log in',
               'success')

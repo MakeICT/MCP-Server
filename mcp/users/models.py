@@ -2,7 +2,7 @@ from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 # from mcp import db, login_manager
-from mcp import db, user_manager
+from mcp import db, bcrypt
 # from flask_login import UserMixin
 from flask_user import UserMixin
 
@@ -38,6 +38,12 @@ class User(BaseModel, UserMixin):
 
     # Relationships
     roles = db.relationship('Role', secondary='user_roles')
+
+    def set_password(self, password):
+        hashed_password = bcrypt.generate_password_hash(password) \
+                        .decode('utf-8')
+        self.password = hashed_password
+        # db.session.commit()
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
