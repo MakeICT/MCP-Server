@@ -111,4 +111,4 @@ def adm_users():
     prev_url = url_for('users.adm_users', page=users.prev_num) \
         if users.has_prev else None
     return render_template('users_admin_page.html', users=users.items,
-                           next_url=next_url, prev_url=prev_url)
+                           page=page, next_url=next_url, prev_url=prev_url)

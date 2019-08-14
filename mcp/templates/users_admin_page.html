@@ -1,21 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
   <div class="content-section">
-    <div class="d-flex justify-content-between">
-      {% if prev_url %}
-        <a class="btn btn-small btn-primary p-0 px-2 m-0" href="{{ prev_url }}">
-          <i class="fas fa-caret-left"></i>
-        </a>
-      {% else %}
-        <div></div>
-      {% endif %}
-      {% if next_url %}
-        <a class="btn btn-small btn-primary p-0 px-2 m-0" href="{{ next_url }}">
-          <i class="fas fa-caret-right"></i>
-        </a>
-      {% endif %}
-    </div>
-
     {% for user in users %}
        <div class="card">
           <div class="card-body p-0 pl-2 py-1 m-0">
@@ -35,4 +20,25 @@
       </div>
     {% endfor %}
   </div>
+  <nav aria-label="...">
+      <ul class="pagination">
+          <li class="page-item{% if not prev_url %} disabled{% endif %}">
+              <a class="page-link" href="{{ prev_url or '#' }} " aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                  <span class="sr-only">Previous</span>
+              </a>
+          </li>
+          <li class="page-item active">
+            <span class="page-link">
+              {{ page }}
+            </span>
+          </li>
+          <li class="page-item next{% if not next_url %} disabled{% endif %}">
+              <a class="page-link" href="{{ next_url or '#' }}">
+                  <span aria-hidden="true">&raquo;</span>
+                  <span class="sr-only">Next</span>
+              </a>
+          </li>
+      </ul>
+  </nav>
 {% endblock content %}
