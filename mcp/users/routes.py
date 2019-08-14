@@ -112,3 +112,30 @@ def adm_users():
         if users.has_prev else None
     return render_template('users_admin_page.html', users=users.items,
                            page=page, next_url=next_url, prev_url=prev_url)
+
+
+@users.route("/admin/user/<user_id>", methods=['GET', 'POST'])
+@roles_required("admin")
+def adm_user(user_id):
+    form = UpdateAccountForm()
+    user = User.query.get(user_id)
+    form.user = user
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            user.image_file = picture_file
+        user.username = form.username.data
+        user.email = form.email.data
+        user.first_name = form.first_name.data
+        user.last_name = form.last_name.data
+        user.birthdate = form.birthdate.data
+        db.session.commit()
+        flash('User account has been updated!', 'success')
+        return redirect(url_for('users.adm_user', user_id=user.id))
+    elif request.method == 'GET':
+        form.username.data = user.username
+        form.email.data = user.email
+        form.first_name.data = user.first_name
+        form.last_name.data = user.last_name
+        form.birthdate.data = user.birthdate
+    return render_template('user_admin_page.html', user=user, form=form)
