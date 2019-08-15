@@ -110,8 +110,9 @@ def adm_users():
         if users.has_next else None
     prev_url = url_for('users.adm_users', page=users.prev_num) \
         if users.has_prev else None
-    return render_template('users_admin_page.html', users=users.items,
-                           page=page, next_url=next_url, prev_url=prev_url)
+    return render_template('users_admin_page.html', title="Users",
+                           users=users.items, page=page, next_url=next_url,
+                           prev_url=prev_url)
 
 
 @users.route("/admin/user/<user_id>", methods=['GET', 'POST'])
@@ -131,11 +132,13 @@ def adm_user(user_id):
         user.birthdate = form.birthdate.data
         db.session.commit()
         flash('User account has been updated!', 'success')
-        return redirect(url_for('users.adm_user', user_id=user.id))
+        return redirect(url_for('users.adm_user', title="Edit User",
+                                user_id=user.id))
     elif request.method == 'GET':
         form.username.data = user.username
         form.email.data = user.email
         form.first_name.data = user.first_name
         form.last_name.data = user.last_name
         form.birthdate.data = user.birthdate
-    return render_template('user_admin_page.html', user=user, form=form)
+    return render_template('user_admin_page.html', title="Edit User",
+                           user=user, form=form)
