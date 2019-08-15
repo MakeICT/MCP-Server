@@ -42,7 +42,14 @@ def Reset():
         e = f"testuser+{fn}.{ln}@makeict.org"
         u = User(first_name=fn, last_name=ln, email=e, username=f"{fn}.{ln}",
                  email_confirmed_at=datetime.utcnow())
+        u.set_password('password')
         db.session.add(u)
+
+    user = User(first_name='testy', last_name='mctestface',
+                email='testuser@makeict.org',  username='user',
+                email_confirmed_at=datetime.utcnow())
+    user.set_password('user')
+    db.session.add(user)
 
     admin_role = Role(name='admin')
     db.session.add(admin_role)
