@@ -49,6 +49,9 @@ class User(BaseModel, UserMixin):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf-8')
 
+    def get_role_names(self):
+        return [role.name for role in self.roles]
+
     @staticmethod
     def verify_reset_token(token):
         s = Serializer(current_app.config['SECRET_KEY'])

@@ -1,4 +1,5 @@
 from flask import render_template, request, redirect, url_for, Blueprint
+from flask_user import login_required, roles_required
 
 main = Blueprint('main', __name__)
 
@@ -13,3 +14,9 @@ def home():
 @main.route("/about")
 def about():
     return render_template('about.html', title='About')
+
+@main.route("/admin")
+@login_required
+@roles_required('admin')
+def admin_dashboard():
+    return render_template('admin_dashboard.html', title="Admin Dashboard")
