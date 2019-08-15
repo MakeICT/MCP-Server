@@ -1,17 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
-  <div class="content-section">
+  <div class="">
     {% for user in users %}
        <div class="card">
           <div class="card-body p-0 pl-2 py-1 m-0">
-            <div class="card-title p-0 m-0">
+            <div class="card-title d-flex p-0 m-0">
+              <div class="flex-grow-1">
               {% for role in user.roles %}
                 {% if role.name == 'admin' %}
                   <i class="fas fa-shield-alt"></i>
                 {% endif %}
               {% endfor %}
-              <b>{{user.last_name}}, {{ user.first_name }}</b>: <a class="text-muted"> {{user.email}}</a>
-              <a href="{{ url_for('users.adm_user', user_id=user.id)}}">Edit User</a>
+              <b>{{user.last_name}}, {{ user.first_name }}</b>: <a class="text-muted flex-grow-1"> {{user.email}}</a>
+              </div>
+              <div class="flex-shrink px-2">
+              <a href="{{ url_for('users.adm_user', user_id=user.id)}}"><i class="fas fa-wrench"></i></a>
+              </div>
             </div>
             <hr class="p-0 m-0">
             <div class="card-text">

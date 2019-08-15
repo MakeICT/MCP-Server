@@ -60,10 +60,9 @@ def account():
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name
         form.birthdate.data = current_user.birthdate
-    image_file = url_for('static',
-                         filename='profile_pics/' + current_user.image_file)
+
     return render_template('account.html', title='Account',
-                           image_file=image_file, form=form)
+                           user=current_user, form=form)
 
 
 @users.route("/reset_password", methods=['GET', 'POST'])
