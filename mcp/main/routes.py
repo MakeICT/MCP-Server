@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, Blueprint
 from flask_user import login_required, roles_required
 
-main = Blueprint('main', __name__)
+main = Blueprint('main', __name__, template_folder='templates')
 
 
 @main.route("/")

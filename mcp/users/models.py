@@ -6,7 +6,7 @@ from mcp import db, bcrypt
 # from flask_login import UserMixin
 from flask_user import UserMixin
 
-from mcp.models import BaseModel
+from mcp.main.models import BaseModel
 
 
 # @user_manager.user_loader

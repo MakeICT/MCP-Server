@@ -9,7 +9,7 @@ from mcp.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
 from mcp.users.utils import save_picture, send_reset_email
 from mcp.config import Config
 
-users = Blueprint('users', __name__)
+users = Blueprint('users', __name__, template_folder='templates')
 
 
 @users.before_app_request
