@@ -13,13 +13,10 @@ from mcp.config import Config
 
 
 db = SQLAlchemy()
-migrate = None
+migrate = Migrate()
 bcrypt = Bcrypt()
-user_manager = None
-# login_manager = LoginManager()
-# login_manager.login_view = 'users.login'
-# login_manager.login_message_category = 'info'
 mail = Mail()
+user_manager = None  # FIXME: this could probably be done better?
 
 
 def create_app(config_class=Config):
@@ -27,14 +24,12 @@ def create_app(config_class=Config):
     app.config.from_object(Config)
 
     db.init_app(app)
+    migrate.init_app(app, db)
     bcrypt.init_app(app)
-    # login_manager.init_app(app)
     mail.init_app(app)
 
     from mcp.users.models import User
     user_manager = UserManager(app, db, User)
-    # user_manager.login_view = 'users.login'
-    # user_manager.login_message_category = 'info'
 
     from mcp.users.routes import users
     from mcp.main.routes import main
@@ -44,10 +39,8 @@ def create_app(config_class=Config):
     app.register_blueprint(main)
     app.register_blueprint(errors)
 
-    migrate = Migrate(app, db)
-
     # Set up logging for production server
-    if not app.debug:
+    if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
             auth = None
             if app.config['MAIL_USERNAME'] or app.config['MAIL_PASSWORD']:
