@@ -6,7 +6,7 @@ from mcp import db
 from mcp.users.models import User
 from mcp.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                              RequestResetForm, ResetPasswordForm)
-from mcp.users.utils import save_picture, send_reset_email
+from mcp.users.utils import save_picture
 from mcp.config import Config
 
 users = Blueprint('users', __name__, template_folder='templates')
