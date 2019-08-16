@@ -1,11 +1,10 @@
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
 from flask import current_app
-# from mcp import db, login_manager
-from mcp import db, bcrypt
-# from flask_login import UserMixin
 from flask_user import UserMixin
 
+from mcp import db, bcrypt
 from mcp.main.models import BaseModel
 
 
@@ -44,6 +43,10 @@ class User(BaseModel, UserMixin):
                         .decode('utf-8')
         self.password = hashed_password
         # db.session.commit()
+
+    def check_password(self, password):
+        match = bcrypt.check_password_hash(self.password, password)
+        return match
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
