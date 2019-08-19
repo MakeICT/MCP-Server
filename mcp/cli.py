@@ -13,6 +13,10 @@ def register(app):
         pass
 
     @test.command()
+    def all():
+        os.system('python -W ignore::DeprecationWarning tests.py')
+
+    @test.command()
     def reset():
         if os.path.exists('mcp/site.db'):
             os.system('rm mcp/site.db')
