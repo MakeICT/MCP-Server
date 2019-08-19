@@ -16,7 +16,7 @@ class TestConfig(Config):
     SERVER_NAME = 'localhost:5000'
 
 
-class BaseTestCase(unittest.TestCase):
+class BaseAppTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestConfig)
         self.app_context = self.app.app_context()
@@ -29,7 +29,7 @@ class BaseTestCase(unittest.TestCase):
         self.app_context.pop()
 
 
-class CoreAppCase(BaseTestCase):
+class BaseClientTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestConfig)
         self.app_context = self.app.test_request_context()
@@ -37,6 +37,13 @@ class CoreAppCase(BaseTestCase):
         self.client = self.app.test_client()
         db.create_all()
 
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
+
+class CoreRouteCase(BaseClientTestCase):
     def test_home_page(self):
         response = (self.client.get(url_for('main.home')))
         self.assertTrue(status.is_success(response.status_code))
@@ -52,7 +59,7 @@ class CoreAppCase(BaseTestCase):
         self.assertTrue("You must be signed in" in response.data.decode())
 
 
-class UserModelCase(BaseTestCase):
+class UserModelCase(BaseAppTestCase):
     def test_password_hashing(self):
         u = User(username='susan')
         u.set_password('cat')
@@ -60,5 +67,9 @@ class UserModelCase(BaseTestCase):
         self.assertTrue(u.check_password('cat'))
 
 
-if __name__ == '__main__':
+def run_all():
     unittest.main(verbosity=2)
+
+
+if __name__ == '__main__':
+    run_all()
