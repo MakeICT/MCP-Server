@@ -60,6 +60,7 @@ class UpdateAccountForm(FlaskForm):
                           validators=[DataRequired()])
     picture = FileField('Profile Picture',
                         validators=[FileAllowed(['jpg', 'png'])])
+    nfc_id = StringField('NFC ID')
     submit = SubmitField('Update')
 
     def validate_username(self, username):

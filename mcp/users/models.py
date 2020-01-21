@@ -29,6 +29,7 @@ class User(BaseModel, UserMixin):
     image_file = db.Column(db.String(20), nullable=False,
                            default='default.jpg')
     password = db.Column(db.String(60), nullable=False, server_default='')
+    nfc_id = db.Column(db.String(20), nullable=True, default=None, unique=True)
     join_date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime)
 

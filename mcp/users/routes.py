@@ -129,6 +129,7 @@ def adm_user(user_id):
         user.first_name = form.first_name.data
         user.last_name = form.last_name.data
         user.birthdate = form.birthdate.data
+        user.nfc_id = form.nfc_id.data
         db.session.commit()
         flash('User account has been updated!', 'success')
         return redirect(url_for('users.adm_user', title="Edit User",
@@ -139,5 +140,6 @@ def adm_user(user_id):
         form.first_name.data = user.first_name
         form.last_name.data = user.last_name
         form.birthdate.data = user.birthdate
+        form.nfc_id.data = user.nfc_id
     return render_template('user_admin_page.html', title="Edit User",
                            user=user, form=form)
