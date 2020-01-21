@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="">
+    {% for group in groups %}
+       <div class="card">
+          <div class="card-body p-0 pl-2 py-1 m-0">
+            <div class="card-title d-flex p-0 m-0">
+              <div class="flex-grow-1">
+              {% for role in group.roles %}
+                {% if role.name == 'admin' %}
+                  <i class="fas fa-shield-alt"></i>
+                {% endif %}
+              {% endfor %}
+              <b>{{group.name}}</b>
+              </div>
+              <div class="flex-shrink px-2">
+              <a href="{{ url_for('groups.adm_group', group_id=group.id)}}"><i class="fas fa-wrench"></i></a>
+              </div>
+            </div>
+            <hr class="p-0 m-0">
+            <div class="card-text">
+              {{group.description}}
+            </div>
+         </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% include '_pagination_footer.html' %}
+{% endblock content %}

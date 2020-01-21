@@ -4,6 +4,7 @@ from datetime import datetime
 
 from mcp import db
 from mcp.users.models import User, Role
+from mcp.groups.models import Group
 
 
 def register(app):
@@ -48,6 +49,10 @@ def register(app):
                       'James Gibson',
                       'Joshua Simpson', ]
 
+        test_groups = ['Admininistrators',
+                       'Members',
+                       'Non-Members']
+
         for user in test_users:
             fn = user.split(' ')[0]
             ln = user.split(' ')[1]
@@ -56,6 +61,11 @@ def register(app):
                      email_confirmed_at=datetime.utcnow())
             u.set_password('password')
             db.session.add(u)
+
+        for group in test_groups:
+            g = Group(name=group, description='This is a totally awesome group description!')
+            db.session.add(g)
+            db.session.commit()
 
         user = User(first_name='testy', last_name='mctestface',
                     email='testuser@makeict.org',  username='user',
