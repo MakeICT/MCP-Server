@@ -137,7 +137,7 @@ def adm_user(user_id):
         db.session.commit()
         flash('User account has been updated!', 'success')
         return redirect(url_for('users.adm_user', title="Edit User",
-                                user_id=user.id))
+                                user_id=user.id, all_groups=all_groups))
     elif request.method == 'GET':
         form.username.data = user.username
         form.email.data = user.email
@@ -147,3 +147,24 @@ def adm_user(user_id):
         form.nfc_id.data = user.nfc_id
     return render_template('user_admin_page.html', title="Edit User",
                            user=user, all_groups=all_groups, form=form)
+
+
+@users.route("/api/users", methods=['GET'])
+@login_required
+def api_users():
+    if request.method == 'GET':
+        users = User.query.all()
+        return users_schema.dump(users)
+
+
+@users.route("/api/users/<user_id>", methods=['GET', 'POST'])
+@login_required
+def api_user(user_id):
+    if request.method == 'GET':
+        user = User.query.get(user_id)
+        return user_schema.dump(user)
+
+    elif request.method == 'POST':
+        user = user_schema.load(request.data)
+        pprint(user)
+        return "Sorry, this endpoint isn't finished yet"
