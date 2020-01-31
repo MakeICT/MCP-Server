@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
+    <a href="{{ url_for('groups.adm_new_group') }}" class="btn btn-sm btn-primary m-1">
+      + add group
+    </a>
   <div class="">
     {% for group in groups %}
        <div class="card">

@@ -1,7 +1,43 @@
 {% extends "layout.html" %}
 {% block content %}
+  <!-- Add group modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {% for group in all_groups %}
+            <button class="btn btn-primary btn-sm">
+              {{ group.name }}
+            </button>
+          {% endfor %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <div class="content-section">
     {% include '_user_header.html' %}
     {% include '_render_form.html' %}
+    <legend class="border-bottom mb-4">Groups</legend>
+    {% for group in user.groups%}
+    <a class="btn btn-secondary btn-sm my-1" href="{{ url_for('groups.adm_group', group_id=group.id) }}">
+     {{ group.name }}
+    </a>
+    {% endfor %}
+
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+      Add Group
+    </button>
   </div>
 {% endblock content %}

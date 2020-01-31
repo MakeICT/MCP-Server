@@ -7,6 +7,7 @@ from mcp.users.models import User
 from mcp.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                              RequestResetForm, ResetPasswordForm)
 from mcp.users.utils import save_picture
+from mcp.groups.models import Group
 from mcp.config import Config
 
 users = Blueprint('users', __name__, template_folder='templates')
@@ -120,6 +121,8 @@ def adm_user(user_id):
     form = UpdateAccountForm()
     user = User.query.get(user_id)
     form.user = user
+    all_groups = Group.query.all()
+
     if form.validate_on_submit():
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
@@ -142,4 +145,4 @@ def adm_user(user_id):
         form.birthdate.data = user.birthdate
         form.nfc_id.data = user.nfc_id
     return render_template('user_admin_page.html', title="Edit User",
-                           user=user, form=form)
+                           user=user, all_groups=all_groups, form=form)

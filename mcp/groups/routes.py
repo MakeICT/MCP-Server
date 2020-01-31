@@ -46,3 +46,38 @@ def adm_group(group_id):
 
     return render_template('group_admin_page.html', title="Edit Group",
                            group=group, form=form)
+
+
+@groups.route("/admin/group/new", methods=['GET', 'POST'])
+@roles_required("admin")
+def adm_new_group():
+    form = EditGroup()
+    group = Group()
+    form.group = group
+    if form.validate_on_submit():
+        group.name = form.name.data
+        group.description = form.description.data
+
+        db.session.add(group)
+        db.session.commit()
+
+        flash('Group has been updated!', 'success')
+        return redirect(url_for('groups.adm_group', title="Edit Group",
+                                group_id=group.id))
+    elif request.method == 'GET':
+        form.name.data = group.name
+        form.description.data = group.description
+
+    return render_template('group_admin_page.html', title="Create Group",
+                           group=group, form=form)
+
+
+@groups.route("/admin/group/delete/<group_id>", methods=['GET'])
+@roles_required("admin")
+def adm_rm_group(group_id):
+    group = Group.query.get(group_id)
+
+    db.session.delete(group)
+    db.session.commit()
+
+    return(redirect(url_for('groups.adm_groups')))
