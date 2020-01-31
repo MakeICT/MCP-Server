@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from mcp import db
+from mcp import db, ma
 from mcp.main.models import BaseModel
 
 user_group = db.Table(
@@ -44,6 +44,16 @@ class Group(BaseModel):
             self.users.remove(user)
         except ValueError:
             pass
+
+
+# Schema for API JSON serialization
+class GroupSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'name', 'description')
+
+
+group_schema = GroupSchema()
+groups_schema = GroupSchema(many=True)
 
 
 # class GroupUsers(db.Model):

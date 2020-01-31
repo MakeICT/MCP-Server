@@ -9,10 +9,13 @@ from flask_bcrypt import Bcrypt
 from flask_user import UserManager
 from flask_mail import Mail
 from flask_migrate import Migrate
+from flask_marshmallow import Marshmallow
+
 from mcp.config import Config
 
 
 db = SQLAlchemy()
+ma = Marshmallow()
 migrate = Migrate()
 bcrypt = Bcrypt()
 mail = Mail()
@@ -24,6 +27,7 @@ def create_app(config_class=Config):
     app.config.from_object(Config)
 
     db.init_app(app)
+    ma.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     mail.init_app(app)

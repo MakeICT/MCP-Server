@@ -3,9 +3,11 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from flask import current_app
 from flask_user import UserMixin
+from marshmallow import fields
 
-from mcp import db, bcrypt
+from mcp import db, ma, bcrypt
 from mcp.main.models import BaseModel
+from mcp.groups.models import groups_schema
 
 
 # @user_manager.user_loader
@@ -115,3 +117,32 @@ users_roles = db.Table(
 #                                                     ondelete='CASCADE'))
 #     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id',
 #                                                     ondelete='CASCADE'))
+
+
+# Schema for API JSON serialization
+class RoleSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'name')
+
+
+role_schema = RoleSchema()
+roles_schema = RoleSchema(many=True)
+
+
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'username', 'email', 'email_confirmed_at', 'first_name',
+                  'last_name', 'birthdate', 'image_file', 'nfc_id', 'join_date',
+                  'last_seen', 'active', 'groups', 'roles', '_links')
+
+    roles = fields.Nested(roles_schema)
+    groups = fields.Nested(groups_schema)
+
+    _links = ma.Hyperlinks({
+        "self": ma.URLFor("users.api_user", user_id="<id>"),
+        "collection": ma.URLFor("users.api_users")
+    })
+
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)

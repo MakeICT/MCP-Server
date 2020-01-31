@@ -1,9 +1,10 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_user import (roles_required, login_required, current_user)
 from datetime import datetime
+from marshmallow import pprint
 
 from mcp import db
-from mcp.users.models import User
+from mcp.users.models import User, user_schema, users_schema
 from mcp.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                              RequestResetForm, ResetPasswordForm)
 from mcp.users.utils import save_picture
