@@ -96,13 +96,22 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True)
 
 
-class UserRoles(db.Model):
-    """
-    Links users to their roles.
-    """
-    __tablename__ = 'user_roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id',
-                                                    ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id',
-                                                    ondelete='CASCADE'))
+users_roles = db.Table(
+    'user_roles',
+    db.Column('user_id', db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE')),
+    db.Column('role_id', db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE')),
+)
+
+
+# class UserRoles(db.Model):
+#     """
+#     Links users to their roles.
+#     """
+#     __tablename__ = 'user_roles'
+#     __table_args__ = {'extend_existing': True}
+
+#     id = db.Column(db.Integer(), primary_key=True)
+#     user_id = db.Column(db.Integer(), db.ForeignKey('user.id',
+#                                                     ondelete='CASCADE'))
+#     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id',
+#                                                     ondelete='CASCADE'))
