@@ -85,3 +85,19 @@ def adm_rm_client(client_id):
     db.session.commit()
 
     return(redirect(url_for('clients.adm_clients')))
+
+
+# API routes
+
+@clients.route("/api/clients/<client_id>/verify/<nfc_id>", methods=['GET'])
+# @login_required
+def api_users(client_id, nfc_id):
+    if request.method == 'GET':
+        user = User.query.filter_by(nfc_id=nfc_id).first()
+        if user:
+            client = Client.query.get(client_id)
+            for group in user.groups:
+                if group in client.groups:
+                    return "{'authorized': 'True'}"
+
+        return "{'authorized': 'False'}"
