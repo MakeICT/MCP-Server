@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+    <a href="{{ url_for('clients.adm_new_client') }}" class="btn btn-sm btn-primary m-1">
+      + add client
+    </a>
+  <div class="">
+    {% for client in clients %}
+       <div class="card">
+          <div class="card-body p-0 pl-2 py-1 m-0">
+            <div class="card-title d-flex p-0 m-0">
+              <div class="flex-grow-1">
+              <b>{{client.name}}</b>
+              </div>
+              <div class="flex-shrink px-2">
+              <a href="{{ url_for('clients.adm_client', client_id=client.id)}}"><i class="fas fa-wrench"></i></a>
+              </div>
+            </div>
+            <hr class="p-0 m-0">
+            <div class="card-text">
+              {{client.description}}
+            </div>
+         </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% include '_pagination_footer.html' %}
+{% endblock content %}

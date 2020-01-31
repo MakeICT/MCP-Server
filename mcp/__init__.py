@@ -35,11 +35,13 @@ def create_app(config_class=Config):
     from mcp.main.routes import main
     from mcp.errors.handlers import errors
     from mcp.groups.routes import groups
+    from mcp.clients.routes import clients
 
     app.register_blueprint(users)
     app.register_blueprint(main)
     app.register_blueprint(errors)
     app.register_blueprint(groups)
+    app.register_blueprint(clients)
 
     # Set up logging for production server
     if not app.debug and not app.testing:
