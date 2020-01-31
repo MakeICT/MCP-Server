@@ -29,6 +29,22 @@ class Group(BaseModel):
     def __repr__(self):
         return(f"Group('{self.name}')")
 
+    def add_user(self, user):
+        """
+        Add a user to the group.
+        """
+        if user not in self.users:
+            self.users.append(user)
+
+    def rm_user(self, user):
+        """
+        remove a user from the group.
+        """
+        try:
+            self.users.remove(user)
+        except ValueError:
+            pass
+
 
 # class GroupUsers(db.Model):
 #     """

@@ -65,6 +65,23 @@ class User(BaseModel, UserMixin):
             return None
         return User.query.get(user_id)
 
+    # Group functions
+    def add_group(self, group):
+        """
+        Add the user to a group.
+        """
+        if group not in self.groups:
+            self.groups.append(group)
+
+    def rm_group(self, group):
+        """
+        remove the user from a group.
+        """
+        try:
+            self.groups.remove(group)
+        except ValueError:
+            pass
+
     def __repr__(self):
         return(f"User('{self.username}', '{self.email}', "
                f"'{self.image_file}', '{self.join_date}')")
