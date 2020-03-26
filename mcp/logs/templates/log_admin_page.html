@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="content-section">
+    {% include '_render_form.html' %}
+    <legend class="border-bottom mb-4">Group Members</legend>
+    {% for user in group.users%}
+    <a class="btn btn-secondary btn-sm my-1" href="{{ url_for('users.adm_user', user_id=user.id) }}">
+     {{ user.last_name }}, {{ user.first_name }}
+    </a>
+    {% endfor %}
+    {% if group.id %}
+      <div>
+        <a href="{{ url_for('groups.adm_rm_group', group_id=group.id ) }}" class="btn btn-sm btn-danger m-1">
+          Delete Group
+        </a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock content %}
