@@ -2,7 +2,7 @@ mcp/site.db
 mcp/static/profile_pics/*
 config.ini
 
-logs/
+/logs/
 
 *.pyc
 *.swp
