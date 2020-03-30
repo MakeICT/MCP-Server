@@ -41,6 +41,7 @@ def create_app(config_class=Config):
     from mcp.groups.routes import groups
     from mcp.clients.routes import clients
     from mcp.logs.routes import logs
+    from mcp.wildapricot.routes import wildapricot
 
     app.register_blueprint(users)
     app.register_blueprint(main)
@@ -48,6 +49,7 @@ def create_app(config_class=Config):
     app.register_blueprint(groups)
     app.register_blueprint(clients)
     app.register_blueprint(logs)
+    app.register_blueprint(wildapricot)
 
     # Set up logging for production server
     if not app.debug and not app.testing:
