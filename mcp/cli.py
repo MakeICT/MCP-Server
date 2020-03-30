@@ -68,7 +68,7 @@ def register(app):
             db.session.commit()
 
         user = User(first_name='testy', last_name='mctestface',
-                    email='testuser@makeict.org',  username='user',
+                    email='testuser+testy@makeict.org',  username='user',
                     email_confirmed_at=datetime.utcnow())
         user.set_password('user')
         db.session.add(user)
