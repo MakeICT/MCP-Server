@@ -1,0 +1,4 @@
+[submodule "mcp/wildapricot/wildapricot_api"]
+	path = mcp/wildapricot/wildapricot_api
+	url = git@github.com:MakeICT/wildapricot_api.git
+	branch = master
