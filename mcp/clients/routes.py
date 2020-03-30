@@ -8,6 +8,7 @@ from mcp.clients.models import Client
 from mcp.clients.forms import EditClient
 
 from mcp.config import Config
+from mcp.logs.routes import create_log
 
 clients = Blueprint('clients', __name__, template_folder='templates')
 
@@ -96,8 +97,7 @@ def api_users(client_id, nfc_id):
         user = User.query.filter_by(nfc_id=nfc_id).first()
         if user:
             client = Client.query.get(client_id)
-            for group in user.groups:
-                if group in client.groups:
-                    return "{'authorized': 'True'}"
+            if any(group in client.groups for group in user.groups):
+                return "{'authorized': True}"
 
-        return "{'authorized': 'False'}"
+        return "{'authorized': False}"

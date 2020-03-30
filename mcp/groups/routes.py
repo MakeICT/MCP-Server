@@ -8,6 +8,7 @@ from mcp.groups.models import Group
 from mcp.groups.forms import EditGroup
 
 from mcp.config import Config
+from mcp.logs.routes import create_log
 
 groups = Blueprint('groups', __name__, template_folder='templates')
 
@@ -62,6 +63,8 @@ def adm_new_group():
         db.session.commit()
 
         flash('Group has been updated!', 'success')
+        create_log('INFO', 'Admin', 'Create Group', f"Created group '{group.name}'")
+
         return redirect(url_for('groups.adm_group', title="Edit Group",
                                 group_id=group.id))
     elif request.method == 'GET':
@@ -79,5 +82,8 @@ def adm_rm_group(group_id):
 
     db.session.delete(group)
     db.session.commit()
+
+    create_log('INFO', 'Admin', 'Delete Group', f"Created group '{group.name}'")
+
 
     return(redirect(url_for('groups.adm_groups')))
