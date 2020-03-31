@@ -49,41 +49,53 @@ def adm_group(group_id):
                            group=group, form=form)
 
 
+def create_group(name, description=None):
+    group = Group()
+    group.name = name
+    group.description = description
+
+    db.session.add(group)
+    db.session.commit()
+    create_log('INFO', 'Admin', 'Create Group', f"Created group '{group.name}'")
+
+    return group
+
+
+def delete_group(group_id):
+    group = Group.query.get(group_id)
+
+    db.session.delete(group)
+    db.session.commit()
+    create_log('INFO', 'Admin', 'Delete Group', f"Created group '{group.name}'")
+
+    return True
+
+def get_groups():
+    return Group.query.all()
+
+
+
 @groups.route("/admin/group/new", methods=['GET', 'POST'])
 @roles_required("admin")
 def adm_new_group():
     form = EditGroup()
-    group = Group()
-    form.group = group
+
     if form.validate_on_submit():
-        group.name = form.name.data
-        group.description = form.description.data
-
-        db.session.add(group)
-        db.session.commit()
-
-        flash('Group has been updated!', 'success')
-        create_log('INFO', 'Admin', 'Create Group', f"Created group '{group.name}'")
+        group = create_group(form.name.data, form.description.data)
+        flash('Group has been created!', 'success')
 
         return redirect(url_for('groups.adm_group', title="Edit Group",
                                 group_id=group.id))
+                                
     elif request.method == 'GET':
-        form.name.data = group.name
-        form.description.data = group.description
-
-    return render_template('group_admin_page.html', title="Create Group",
-                           group=group, form=form)
+        return render_template('group_admin_page.html', title="Create Group",
+                            group=None, form=form)
 
 
 @groups.route("/admin/group/delete/<group_id>", methods=['GET'])
 @roles_required("admin")
 def adm_rm_group(group_id):
-    group = Group.query.get(group_id)
-
-    db.session.delete(group)
-    db.session.commit()
-
-    create_log('INFO', 'Admin', 'Delete Group', f"Created group '{group.name}'")
-
+    delete_group(group_id)
+    flash('Group has been deleted!', 'success')
 
     return(redirect(url_for('groups.adm_groups')))
