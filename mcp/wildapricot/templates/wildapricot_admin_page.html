@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block content %}
+<script>
+  function wa_sync(data) {
+    // console.log(JSON.stringify(data));
+    fetch('/rpc/wildapricot/sync', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(jsonData => document.getElementById("result").innerHTML = JSON.stringify(jsonData))
+    .catch(error => console.error('Error:', error));
+  }
+</script>
+  <div class="content-section">
+      <span>
+          <button type="submit" name="your_name" value="your_value" class="btn btn-sm btn-primary m-1" onclick="wa_sync({updated_since:1})" >Sync 1 Day</button>
+      </span>
+      <span>
+          <button type="submit" name="your_name" value="your_value" class="btn btn-sm btn-primary m-1" onclick="wa_sync({updated_since:7})" >Sync 7 Days</button>
+      </span>
+      <span>
+          <button type="submit" name="your_name" value="your_value" class="btn btn-sm btn-primary m-1" onclick="wa_sync({updated_since:30})" >Sync 30 Days</button>
+      </span>
+      <span>
+          <button type="submit" name="your_name" value="your_value" class="btn btn-sm btn-primary m-1" onclick="wa_sync()" >Sync All</button>
+      </span>
+  </div>
+  <div id=result>
+
+  </div>
+{% endblock content %}
+
