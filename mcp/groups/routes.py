@@ -84,6 +84,8 @@ def adm_new_group():
         group = create_group(form.name.data, form.description.data)
         flash('Group has been created!', 'success')
 
+        create_log('INFO', 'Admin', 'Create Group', f"Created group '{group.name}'")
+
         return redirect(url_for('groups.adm_group', title="Edit Group",
                                 group_id=group.id))
                                 
@@ -97,5 +99,8 @@ def adm_new_group():
 def adm_rm_group(group_id):
     delete_group(group_id)
     flash('Group has been deleted!', 'success')
+
+    create_log('INFO', 'Admin', 'Delete Group', f"Deleted group '{group.name}'")
+
 
     return(redirect(url_for('groups.adm_groups')))
