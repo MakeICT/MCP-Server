@@ -6,8 +6,10 @@ from marshmallow import Schema, fields, ValidationError, pre_load
 from mcp import db
 from mcp.users.models import User
 from mcp.logs.models import Log, LogLevel, log_schema
-from mcp.wildapricot.models import WildapricotUser
+from mcp.wildapricot.models import WildapricotUser, WildapricotGroup
 from mcp.config import Config, settings
+from mcp.groups.models import Group
+from mcp.groups.routes import create_group, get_groups
 
 from .wildapricot_api import WaApiClient
 
@@ -23,19 +25,49 @@ WA_API.authenticate_with_apikey(settings.get('wildapricot', 'api_key'))
 
 @wildapricot.route("/admin/wildapricot", methods=['GET', 'POST'])
 @roles_required("admin")
-def adm_logs():
-    return
-    # page = request.args.get('page', 1, type=int)
-    # logs = Log.query.order_by(Log.created_date.asc()).paginate(page, 25, False)
-    # next_url = url_for('logs.adm_logs', page=logs.next_num) \
-    #     if logs.has_next else None
-    # prev_url = url_for('logs.adm_logs', page=logs.prev_num) \
-    #     if logs.has_prev else None
-    # return render_template('logs_admin_page.html', title="Logs"
-    #                        logs=logs.items, page=page, next_url=next_url,
-    #                        prev_url=prev_url)
+def adm_wildapricot():
+    return render_template('wildapricot_admin_page.html', title="Wildapricot")
+
+def pull_groups():
+    wa_groups = WA_API.GetMemberGroups()
+
+
+    previously_synced_group_ids = [group.wildapricot_group_id for group in WildapricotGroup.query.all()]
+    print(previously_synced_group_ids)
+
+    for wa_group in wa_groups:
+        is_new_group = False
+        print(wa_group)
+        if wa_group['Id'] in previously_synced_group_ids:
+            print(f"Updating existing group")
+            # mcp_group_id = WildapricotGroup.query.filter_by(wildapricot_group_id=wa_group['Id'])[0].mcp_group_id
+            mcp_group_id = WildapricotGroup.query.get(wa_group['Id']).mcp_group_id
+            mcp_group = Group.query.get(mcp_group_id)
+
+        else:
+            is_new_group = True
+            print(f"Creating new group")
+            mcp_group = Group()
+
+            
+        mcp_group.name = wa_group['Name']
+        mcp_group.description = wa_group['Description']
+
+        db.session.add(mcp_group)
+
+        if is_new_group:
+            db.session.commit()
+            new_wa_group = WildapricotGroup(id=wa_group['Id'])
+            # new_wa_group.id = wa_group['Id']
+            new_wa_group.wildapricot_group_id = wa_group['Id']
+            new_wa_group.mcp_group_id = mcp_group.id
+            db.session.add(new_wa_group)
+    
+    db.session.commit()
+
 
 def pull_users(user_ids=None, updated_since=None):
+    # Build the filter string
     if updated_since:
         wa_updated_since = WA_API.DateTimeToWADate(updated_since)
         query_filter = f"'Profile%20last%20updated'%20ge%20{wa_updated_since}"
@@ -65,10 +97,14 @@ def pull_users(user_ids=None, updated_since=None):
     print(len(contacts))
 
     previously_synced_user_ids = [user.wildapricot_user_id for user in WildapricotUser.query.all()]
-    # print(">>>>>>", previously_synced_user_ids)
+
     for contact in contacts:
-        # print(contact['Id'])
+        # Create a new user or update an existing user based on WA contact fields
         is_new_user = False
+        flattened_fields = {}
+        for field in contact['FieldValues']:
+            flattened_fields[field['FieldName']] = field['Value']
+
         if contact['Id'] in previously_synced_user_ids:
             print('Updating previously synced user')
             # print(contact)
@@ -79,9 +115,8 @@ def pull_users(user_ids=None, updated_since=None):
             is_new_user = True
             mcp_user = User()
             mcp_user.username = default_username
-        flattened_fields = {}
-        for field in contact['FieldValues']:
-            flattened_fields[field['FieldName']] = field['Value']
+
+        # Pull basic fields    
         mcp_user.first_name = contact['FirstName']
         mcp_user.last_name = contact['LastName']
         print(contact['Email'])
@@ -89,30 +124,58 @@ def pull_users(user_ids=None, updated_since=None):
             db.session.rollback()
             print(f"WA Contact #{contact['Id']} has no email address. Skipping account creation.")
             continue
-        mcp_user.email = contact['Email']
-                
-
-        try:
+        mcp_user.email = contact['Email']      
+        if flattened_fields['DOB']:
             mcp_user.birthdate = WA_API.WADateToDateTime(flattened_fields['DOB'])
-        except TypeError:
-            pass
 
-        db.session.add(mcp_user)
-        db.session.commit()
-        
-        try:
-            for group in flattened_fields['Group participation']:
-                pass
-        except KeyError:
-            pass
+        # Set active status
+        mcp_user.active = False
+        if 'MembershipLevel' in contact.keys():
+            valid_level = not (contact['MembershipLevel']['Name'] == 'Non-Member' or \
+                               contact['MembershipLevel']['Name'] == 'Recurring donor ($10/mo x 12)')
+            valid_status = contact['Status'] == 'Active' or \
+                           contact['Status'] == 'PendingRenewal'
+            try: 
+                suspended = contact['Suspended member']
+            except KeyError:
+                suspended = False
 
+            if valid_level and valid_status and not suspended:
+                mcp_user.active = True
 
         if is_new_user:
-            new_wa_user = WildapricotUser()
+            db.session.add(mcp_user)
+            db.session.commit()
+
+        synced_wa_group_ids = []
+        if 'Group participation' in flattened_fields:
+            for group in flattened_fields['Group participation']:
+                synced_wa_group_ids.append(group['Id'])
+                # mcp_group_id = WildapricotGroup.query.filter_by(wildapricot_group_id=group['Id'])[0].mcp_group_id
+                mcp_group_id = WildapricotGroup.query.get(group['Id']).mcp_group_id
+                mcp_group = Group.query.get(mcp_group_id)
+                mcp_group.add_user(mcp_user)
+                print(f"Adding {mcp_user.first_name} {mcp_user.last_name} to {group['Label']}")
+
+        if is_new_user:
+            # Create a database entry to link the MCP user id with the WA user id
+            new_wa_user = WildapricotUser(id=contact['Id'])
             new_wa_user.wildapricot_user_id = contact['Id']
             new_wa_user.mcp_user_id = mcp_user.id
             db.session.add(new_wa_user)
-            db.session.commit()
+        else:
+            # Remove the user from any WA groups that they are no longer a part of
+            groups_from_wa = [group.mcp_group_id for group in WildapricotGroup.query.all()]
+
+            for group in mcp_user.groups:
+                if group.id in groups_from_wa:
+                    # wa_group_id = WildapricotGroup.query.filter_by(mcp_group_id=group.id)[0].wildapricot_group_id
+                    wa_group_id = WildapricotGroup.query.join(Group).filter(Group.id==group.id).first().id
+                    if not wa_group_id in synced_wa_group_ids:
+                        group.rm_user(mcp_user)
+                        print(f"Removing {mcp_user.first_name} {mcp_user.last_name} from {group.name}")
+
+        db.session.commit()
 
     return True
 
@@ -120,6 +183,8 @@ def pull_users(user_ids=None, updated_since=None):
 @wildapricot.route("/rpc/wildapricot/sync", methods=['POST'])
 def rpc_wildapricot_sync():
     if request.method == 'POST':
+        pull_groups()
+
         json_data = request.get_json()
         user_ids = updated_since = None
         if json_data:
