@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint
+from flask import render_template, url_for, flash, redirect, request, Blueprint, json, current_app
 from flask_user import (roles_required, login_required, current_user)
 from datetime import datetime, timedelta
 from marshmallow import Schema, fields, ValidationError, pre_load
@@ -188,12 +188,24 @@ def rpc_wildapricot_sync():
         json_data = request.get_json()
         user_ids = updated_since = None
         if json_data:
-            if json_data['user_ids']:
+            print(json_data)
+            if 'user_ids' in json_data.keys():
                 user_ids = json_data['user_ids']
                 print('>>>>>>>>>>>>>>>>>>',user_ids)
-            if json_data['updated_since']:
-                updated_since = json_data['updated_since']
+            if 'updated_since'  in json_data.keys():
+                updated_since = datetime.today() - timedelta(days=json_data['updated_since'])
+        # updated_since = datetime.today()-timedelta(days=1)
         if pull_users(user_ids=user_ids, updated_since=updated_since):
-            return "{'status': 'success'}"
+            data = {'status': 'success'}
+            status = 200
         else:
-            return "{'status': 'failure'}"
+            data = {'status': 'failure'}
+            status = 400
+
+        response = current_app.response_class(
+            response=json.dumps(data),
+            status=200,
+            mimetype='application/json'
+        )
+
+        return response
