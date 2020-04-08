@@ -12,7 +12,7 @@ settings.read(str(Path(basedir).parents[0]) + '/config.ini')
 class Config:
     TESTING = False
     SECRET_KEY = settings.get('general', 'secret_key')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') \
+    SQLALCHEMY_DATABASE_URI = settings.get('Database', 'URL') \
         or 'sqlite:///' + os.path.join(basedir, 'site.db')
         # 'sqlite:///site.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
