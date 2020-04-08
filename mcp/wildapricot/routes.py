@@ -127,6 +127,8 @@ def pull_users(user_ids=None, updated_since=None):
         mcp_user.email = contact['Email']      
         if flattened_fields['DOB']:
             mcp_user.birthdate = WA_API.WADateToDateTime(flattened_fields['DOB'])
+        if flattened_fields['KeyID']:
+            mcp_user.nfc_id = flattened_fields['KeyID']
 
         # Set active status
         mcp_user.active = False
@@ -135,9 +137,9 @@ def pull_users(user_ids=None, updated_since=None):
                                contact['MembershipLevel']['Name'] == 'Recurring donor ($10/mo x 12)')
             valid_status = contact['Status'] == 'Active' or \
                            contact['Status'] == 'PendingRenewal'
-            try: 
+            if 'Suspended member' in contact.keys(): 
                 suspended = contact['Suspended member']
-            except KeyError:
+            else:
                 suspended = False
 
             if valid_level and valid_status and not suspended:
