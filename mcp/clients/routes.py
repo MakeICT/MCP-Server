@@ -9,11 +9,12 @@ from mcp.clients.forms import EditClient
 
 from mcp.config import Config
 from mcp.logs.routes import create_log
+from mcp.groups.models import Group
 
 clients = Blueprint('clients', __name__, template_folder='templates')
 
 
-@clients.route("/admin/clients", methods=['GET', 'POST'])
+@clients.route("/admin/clients", methods=['GET'])
 @roles_required("admin")
 def adm_clients():
     page = request.args.get('page', 1, type=int)
@@ -30,50 +31,29 @@ def adm_clients():
 @clients.route("/admin/client/<client_id>", methods=['GET', 'POST'])
 @roles_required("admin")
 def adm_client(client_id):
+    all_groups = Group.query.all()
     form = EditClient()
-    client = Client.query.get(client_id)
-    form.client = client
-    if form.validate_on_submit():
-        client.name = form.name.data
-        client.description = form.description.data
-        client.client_id = form.client_id.data
+    form.groups.choices = [(g.name, g.name) for g in all_groups]
 
+    if client_id == 'new':
+        client = Client()
+    else:
+        client = Client.query.get(client_id)
+    form.client = client
+    
+    if form.validate_on_submit():
+        form.fill_client(client)
         db.session.commit()
         flash('Client has been updated!', 'success')
-        return redirect(url_for('clients.adm_clients', title="Edit Client",
-                                client_id=client.id))
+        return redirect(url_for('clients.adm_client', title='Edit Client', client_id=client.id))
+
+    elif request.method == 'POST':
+        flash('Form validation error!', 'error')
+
     elif request.method == 'GET':
-        form.name.data = client.name
-        form.description.data = client.description
-        form.client_id.data = client.client_id
+        form.fill_form(client)
 
     return render_template('client_admin_page.html', title="Edit Client",
-                           client=client, form=form)
-
-
-@clients.route("/admin/client/new", methods=['GET', 'POST'])
-@roles_required("admin")
-def adm_new_client():
-    form = EditClient()
-    client = Client()
-    form.client = client
-    if form.validate_on_submit():
-        client.name = form.name.data
-        client.description = form.description.data
-        client.client_id = form.client_id.data
-
-        db.session.add(client)
-        db.session.commit()
-
-        flash('Client has been updated!', 'success')
-        return redirect(url_for('clients.adm_client', title="Edit Client",
-                                client_id=client.id))
-    elif request.method == 'GET':
-        form.name.data = client.name
-        form.description.data = client.description
-        form.client_id.data = client.client_id
-
-    return render_template('client_admin_page.html', title="Create Client",
                            client=client, form=form)
 
 
