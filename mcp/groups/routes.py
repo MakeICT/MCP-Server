@@ -1,10 +1,11 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_user import (roles_required, login_required, current_user)
 from datetime import datetime
+from marshmallow import pprint
 
 from mcp import db
 from mcp.users.models import User
-from mcp.groups.models import Group
+from mcp.groups.models import Group, group_schema, groups_schema
 from mcp.groups.forms import EditGroup
 
 from mcp.config import Config
@@ -104,3 +105,24 @@ def adm_rm_group(group_id):
 
 
     return(redirect(url_for('groups.adm_groups')))
+
+
+@groups.route("/api/groups", methods=['GET'])
+@login_required
+def api_groups():
+    if request.method == 'GET':
+        groups = Group.query.all()
+        return groups_schema.dumps(groups)
+
+
+@groups.route("/api/groups/<group_id>", methods=['GET', 'PUT'])
+@login_required
+def api_group(group_id):
+    if request.method == 'GET':
+        group = Group.query.get(group_id)
+        return group_schema.dumps(group)
+
+    elif request.method == 'PUT':
+        group = group_schema.load(request.data)
+        pprint(group)
+        return "Sorry, this endpoint isn't finished yet"
