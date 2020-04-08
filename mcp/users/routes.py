@@ -43,28 +43,8 @@ def logout():
 @users.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
-    form = UpdateAccountForm()
-    if form.validate_on_submit():
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-            current_user.image_file = picture_file
-        current_user.username = form.username.data
-        current_user.email = form.email.data
-        current_user.first_name = form.first_name.data
-        current_user.last_name = form.last_name.data
-        current_user.birthdate = form.birthdate.data
-        db.session.commit()
-        flash('Your account has been updated!', 'success')
-        return redirect(url_for('users.account'))
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.email.data = current_user.email
-        form.first_name.data = current_user.first_name
-        form.last_name.data = current_user.last_name
-        form.birthdate.data = current_user.birthdate
-
-    return render_template('account.html', title='Account',
-                           user=current_user, form=form)
+    return redirect(url_for('users.adm_user', title="Edit Account",
+                        user_id=current_user.id))
 
 
 @users.route("/reset_password", methods=['GET', 'POST'])
@@ -119,32 +99,22 @@ def adm_users():
 @users.route("/admin/user/<user_id>", methods=['GET', 'POST'])
 @roles_required("admin")
 def adm_user(user_id):
-    form = UpdateAccountForm()
-    user = User.query.get(user_id)
-    form.user = user
     all_groups = Group.query.all()
+    user = User.query.get(user_id)
+    
+    form = UpdateAccountForm()
+    form.groups.choices = [(g.name, g.name) for g in all_groups]
+    form.user = user
 
     if form.validate_on_submit():
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-            user.image_file = picture_file
-        user.username = form.username.data
-        user.email = form.email.data
-        user.first_name = form.first_name.data
-        user.last_name = form.last_name.data
-        user.birthdate = form.birthdate.data
-        user.nfc_id = form.nfc_id.data
+        form.fill_user(user)
         db.session.commit()
         flash('User account has been updated!', 'success')
         return redirect(url_for('users.adm_user', title="Edit User",
                                 user_id=user.id, all_groups=all_groups))
     elif request.method == 'GET':
-        form.username.data = user.username
-        form.email.data = user.email
-        form.first_name.data = user.first_name
-        form.last_name.data = user.last_name
-        form.birthdate.data = user.birthdate
-        form.nfc_id.data = user.nfc_id
+        form.populate(user)
+
     return render_template('user_admin_page.html', title="Edit User",
                            user=user, all_groups=all_groups, form=form)
 
@@ -154,17 +124,17 @@ def adm_user(user_id):
 def api_users():
     if request.method == 'GET':
         users = User.query.all()
-        return users_schema.dump(users)
+        return users_schema.dumps(users)
 
 
-@users.route("/api/users/<user_id>", methods=['GET', 'POST'])
+@users.route("/api/users/<user_id>", methods=['GET', 'PUT'])
 @login_required
 def api_user(user_id):
     if request.method == 'GET':
         user = User.query.get(user_id)
-        return user_schema.dump(user)
+        return user_schema.dumps(user)
 
-    elif request.method == 'POST':
+    elif request.method == 'PUT':
         user = user_schema.load(request.data)
         pprint(user)
         return "Sorry, this endpoint isn't finished yet"
