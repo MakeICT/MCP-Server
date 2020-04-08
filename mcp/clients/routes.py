@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint
+from flask import render_template, url_for, flash, redirect, request, Blueprint, json, current_app
 from flask_user import (roles_required, login_required, current_user)
 from datetime import datetime
 
@@ -72,12 +72,21 @@ def adm_rm_client(client_id):
 
 @clients.route("/api/clients/<client_id>/verify/<nfc_id>", methods=['GET'])
 # @login_required
-def api_users(client_id, nfc_id):
+def api_verify_nfc(client_id, nfc_id):
     if request.method == 'GET':
         user = User.query.filter_by(nfc_id=nfc_id).first()
-        if user:
+        payload = {'authorized': 'false'}
+        status = 200
+        if user and user.active:
             client = Client.query.get(client_id)
             if any(group in client.groups for group in user.groups):
-                return "{'authorized': True}"
+                payload['authorized'] = 'true'
 
-        return "{'authorized': False}"
+        response = current_app.response_class(
+            response=json.dumps(payload),
+            status=status,
+            mimetype='application/json'
+        )
+        print(json.dumps(payload))
+
+        return response
