@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <script>
-  function wa_sync(data) {
+  function wa_sync(data={}) {
     // console.log(JSON.stringify(data));
     fetch('/rpc/wildapricot/sync', {
       method: 'post',
