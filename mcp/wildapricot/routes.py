@@ -206,7 +206,7 @@ def rpc_wildapricot_sync():
 
         response = current_app.response_class(
             response=json.dumps(data),
-            status=200,
+            status=status,
             mimetype='application/json'
         )
 
