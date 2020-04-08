@@ -18,6 +18,9 @@ flask-api = "*"
 flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 pytz = "*"
+gunicorn = "*"
+pymysql = "*"
+cryptography = "*"
 
 [requires]
 python_version = "3.7"
