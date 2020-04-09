@@ -19,7 +19,7 @@ class Group(BaseModel):
     """
     __tablename__ = 'group'
 
-    name = db.Column(db.String(20), unique=True, nullable=False)
+    name = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.String(500), nullable=True)
 
     # Relationships
