@@ -7,7 +7,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 settings = configparser.ConfigParser()
 settings.read(str(Path(basedir).parents[0]) + '/config.ini')
-
+print (str(Path(basedir).parents[0]) + '/config.ini');
 
 class Config:
     TESTING = False

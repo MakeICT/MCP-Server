@@ -17,7 +17,7 @@ logs = Blueprint('logs', __name__, template_folder='templates')
 @roles_required("admin")
 def adm_logs():
     page = request.args.get('page', 1, type=int)
-    logs = Log.query.order_by(Log.created_date.asc()).paginate(page, 25, False)
+    logs = Log.query.order_by(Log.created_date.desc()).paginate(page, 25, False)
     next_url = url_for('logs.adm_logs', page=logs.next_num) \
         if logs.has_next else None
     prev_url = url_for('logs.adm_logs', page=logs.prev_num) \
@@ -49,10 +49,10 @@ def api_logs(log_data=None):
                 setattr(log_entry, field, LogLevel[log_data[field].upper()])
             else:
                 setattr(log_entry, field, log_data[field])
-        # log_entry.log_level = LogLevel[data['log_level'].upper()]
-        # log_entry.log_type = data['log_type']
-        # log_entry.event_type = data['event_type']
-        # log_entry.details = data['details']
+#        log_entry.log_level = LogLevel[data['log_level'].upper()]
+#        log_entry.log_type = data['log_type']
+#        log_entry.event_type = data['event_type']
+#        log_entry.details = data['details']
 
         db.session.add(log_entry)
         db.session.commit()
@@ -62,8 +62,7 @@ def api_logs(log_data=None):
     else:
         return {"Error": "No log data provided"}, 400
 
-def create_log(level, log_type, event_type, details=None, source_user=None, \
-               target_user=None, key_id=None ):
+def create_log(level, log_type, event_type, details=None, source_user=None, target_user=None, key_id=None ):
     api_logs({'log_level':level,
               'log_type':log_type,
               'event_type':event_type,

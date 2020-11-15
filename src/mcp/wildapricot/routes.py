@@ -94,6 +94,7 @@ def pull_users(user_ids=None, updated_since=None):
             query_filter += ")"
     print(query_filter)
     contacts = WA_API.GetFilteredContacts(query_filter)
+   
     print(len(contacts))
 
     previously_synced_user_ids = [user.wildapricot_user_id for user in WildapricotUser.query.all()]
@@ -110,11 +111,20 @@ def pull_users(user_ids=None, updated_since=None):
             # print(contact)
             mcp_user = User.query.get(WildapricotUser.query.filter_by(wildapricot_user_id=contact['Id'])[0].mcp_user_id)
         else:
-            default_username = contact['FirstName'] + contact['LastName'] + str(contact['Id'])
-            print(f"Creating new user {default_username}")
-            is_new_user = True
-            mcp_user = User()
-            mcp_user.username = default_username
+            try:
+                default_username = contact['FirstName'] + contact['LastName'] + str(contact['Id'])
+                print(len(default_username))
+                print(len(contact['LastName']))
+                print(len(contact['FirstName']))
+                print(len(str(contact['Id'])))
+                print(f"Creating new user {default_username}")
+                is_new_user = True
+                mcp_user = User()
+                mcp_user.username = default_username
+            
+            except sqlalchemy.exc.DataError:
+                continue
+
 
         # Pull basic fields    
         mcp_user.first_name = contact['FirstName']
@@ -197,6 +207,7 @@ def rpc_wildapricot_sync():
             if 'updated_since'  in json_data.keys():
                 updated_since = datetime.today() - timedelta(days=json_data['updated_since'])
         # updated_since = datetime.today()-timedelta(days=1)
+        #print(json_data)
         if pull_users(user_ids=user_ids, updated_since=updated_since):
             data = {'status': 'success'}
             status = 200
@@ -211,3 +222,6 @@ def rpc_wildapricot_sync():
         )
 
         return response
+
+
+

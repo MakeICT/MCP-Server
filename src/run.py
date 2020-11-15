@@ -1,13 +1,10 @@
-from mcp import create_app, db, cli
-from mcp.users.models import User
+from mcp.wildeapricot import create_app, db, cli
 
 app = create_app()
 cli.register(app)
 
 if __name__ == '__main__':
-    app.run()
+   print("start")
+   mcp.wildapricot.routes.pull_groups()
+   print("end")
 
-
-@app.shell_context_processor
-def make_shell_context():
-    return {'db': db, 'User': User}

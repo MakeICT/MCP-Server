@@ -21,7 +21,7 @@ class User(BaseModel, UserMixin):
     """
     __tablename__ = 'user'
 
-    username = db.Column(db.String(32), unique=True,
+    username = db.Column(db.String(50), unique=True,
                          nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     email_confirmed_at = db.Column(db.DateTime())
@@ -31,7 +31,7 @@ class User(BaseModel, UserMixin):
     image_file = db.Column(db.String(20), nullable=False,
                            default='default.jpg')
     password = db.Column(db.String(60), nullable=False, server_default='')
-    nfc_id = db.Column(db.String(20), nullable=True, default=None, unique=True)
+    nfc_id = db.Column(db.String(20), nullable=True, default='XXXXXXXXXXXXXXXXXXXX', unique=True)
     join_date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime)
 

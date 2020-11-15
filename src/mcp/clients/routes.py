@@ -11,6 +11,7 @@ from mcp.config import Config
 from mcp.logs.routes import create_log
 from mcp.groups.models import Group
 
+
 clients = Blueprint('clients', __name__, template_folder='templates')
 
 
@@ -69,18 +70,30 @@ def adm_rm_client(client_id):
 
 
 # API routes
-
 @clients.route("/api/clients/<client_id>/verify/<nfc_id>", methods=['GET'])
 # @login_required
 def api_verify_nfc(client_id, nfc_id):
     if request.method == 'GET':
+        print( client_id)
+        print( nfc_id ) 
         user = User.query.filter_by(nfc_id=nfc_id).first()
+        print (user)
         payload = {'authorized': 'false'}
         status = 200
+        sresult=0
         if user and user.active:
             client = Client.query.get(client_id)
             if any(group in client.groups for group in user.groups):
                 payload['authorized'] = 'true'
+                sresult=1
+		
+        if sresult==0:
+            if user:
+                create_log('INFO', 'badge', 'scan_fail', f"Unauthorized '{user.username}'", None, None, nfc_id)
+            else:
+                create_log('INFO', 'badge', 'scan_fail', f"Unknown badge '{nfc_id}'", None, None, nfc_id)
+        else:
+            create_log('INFO', 'badge', 'scan_success', f"Authorized '{user.username}'", None, None, nfc_id)
 
         response = current_app.response_class(
             response=json.dumps(payload),
@@ -90,3 +103,40 @@ def api_verify_nfc(client_id, nfc_id):
         print(json.dumps(payload))
 
         return response
+
+
+
+@clients.route("/api/clients/<client_id>/get_nfc_list", methods=['GET'])
+# @login_required
+def api_get_nfc_list(client_id):
+    if request.method == 'GET':
+        print(client_id)
+        is_active=1
+        users = User.query.filter_by(active=1).all()
+        #print(users)
+        status = 200
+        client = Client.query.get(client_id)
+        atoken = False
+        payload = {'authorized': 'false'}
+        active_keys = [] 
+        for user in users:
+        #    print (user)
+            if user and user.active and not user.nfc_id is None:
+                if any(group in client.groups for group in user.groups):
+                    active_keys.append(user.nfc_id)
+                    atoken=True
+
+       # print(active_keys)
+        if (atoken):
+            payload['authorized'] = 'true'
+            payload['keys'] = active_keys 
+
+        response = current_app.response_class(
+            response=json.dumps(payload),
+            status=status,
+            mimetype='application/json'
+        )
+        print(json.dumps(payload))
+
+        return response
+

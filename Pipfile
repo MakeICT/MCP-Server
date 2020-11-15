@@ -21,6 +21,8 @@ pytz = "*"
 gunicorn = "*"
 pymysql = "*"
 cryptography = "*"
+email-validator = "*"
+wsgi = "*"
 
 [requires]
 python_version = "3.7"

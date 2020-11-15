@@ -81,7 +81,6 @@ def reset_token(token):
     return render_template('reset_token.html', title='Reset Password',
                            form=form)
 
-
 @users.route("/admin/users")
 @roles_required("admin")
 def adm_users():
@@ -90,6 +89,19 @@ def adm_users():
     next_url = url_for('users.adm_users', page=users.next_num) \
         if users.has_next else None
     prev_url = url_for('users.adm_users', page=users.prev_num) \
+        if users.has_prev else None
+    return render_template('users_admin_page.html', title="Users",
+                           users=users.items, page=page, next_url=next_url,
+                           prev_url=prev_url)
+
+@users.route("/admin/users")
+@roles_required("admin")
+def adm_users2():
+    page = request.args.get('page', 1, type=int)
+    users = User.query.order_by(User.last_name.asc()).paginate(page, 10, False)
+    next_url = url_for('users.adm_users2', page=users.next_num) \
+        if users.has_next else None
+    prev_url = url_for('users.adm_users2', page=users.prev_num) \
         if users.has_prev else None
     return render_template('users_admin_page.html', title="Users",
                            users=users.items, page=page, next_url=next_url,

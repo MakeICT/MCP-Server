@@ -12,7 +12,8 @@ from mcp.users.models import User
 
 class TestConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://mcp:BTo4ZS8xh4tkrrvSqhgvNBM6y4fw@localhost/master_control_program
+
     SERVER_NAME = 'localhost:5000'
 
 
