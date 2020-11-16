@@ -2,3 +2,6 @@
 	path = mcp/wildapricot/wildapricot_api
 	url = git@github.com:MakeICT/wildapricot_api.git
 	branch = master
+[submodule "src/mcp/wildapricot/wildapricot_api"]
+	path = src/mcp/wildapricot/wildapricot_api
+	url = https://github.com/MakeICT/wildapricot_api.git
