@@ -21,7 +21,7 @@ class User(BaseModel, UserMixin):
     """
     __tablename__ = 'user'
 
-    username = db.Column(db.String(32), unique=True,
+    username = db.Column(db.String(50), unique=True,
                          nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     email_confirmed_at = db.Column(db.DateTime())
