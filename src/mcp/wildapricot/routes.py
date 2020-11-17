@@ -7,6 +7,7 @@ from mcp import db
 from mcp.users.models import User
 from mcp.logs.models import Log, LogLevel, log_schema
 from mcp.wildapricot.models import WildapricotUser, WildapricotGroup
+from mcp.wildapricot.models import wildapricot_user_schema
 from mcp.config import Config, settings
 from mcp.groups.models import Group
 from mcp.groups.routes import create_group, get_groups
@@ -279,3 +280,9 @@ def rpc_wildapricot_push():
         )
 
         return response
+
+
+@wildapricot.route("/api/wildapricot/users/<user_id>", methods=['GET'])
+def api_wildapricot_user(user_id):
+    wa_user = WildapricotUser.query.filter_by(mcp_user_id=user_id).first()
+    return wildapricot_user_schema.dumps(wa_user)
