@@ -1,4 +1,4 @@
-<form class="form form-horizontal" method="POST" action="" enctype="multipart/form-data">
+<form class="form form-horizontal" method="POST" action="" enctype="multipart/form-data" autocomplete="off">
     {{ form.hidden_tag() }}
     <fieldset class="form-group">
         <legend class="border-bottom mb-4">{{ title }}</legend>
@@ -31,6 +31,21 @@
                         </div>
                     {% else %}
                         {{ field(class="form-control form-control-sm col-md-10") }}
+                    {% endif %}
+                </div>  
+
+            {% elif field.type=='BooleanField' %}
+                <div class="form-row">
+                    {{ field.label(class="form-control-label-sm col-md-2") }}
+                    {% if field.errors %}
+                        {{ field(class="form-control form-control-sm col-md-10 is-invalid") }}
+                        <div class="invalid-feedback mt-0 pt-0">
+                            {% for error in field.errors %}
+                                <span class="float-right col-md-10 pl-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ field(class="") }}
                     {% endif %}
                 </div>                    
 
