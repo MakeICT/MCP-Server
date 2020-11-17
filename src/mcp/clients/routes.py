@@ -74,13 +74,26 @@ def adm_rm_client(client_id):
 # @login_required
 def api_verify_nfc(client_id, nfc_id):
     if request.method == 'GET':
+        print( client_id)
+        print( nfc_id ) 
         user = User.query.filter_by(nfc_id=nfc_id).first()
+        print (user)
         payload = {'authorized': 'false'}
         status = 200
+        sresult=0
         if user and user.active:
             client = Client.query.get(client_id)
             if any(group in client.groups for group in user.groups):
                 payload['authorized'] = 'true'
+                sresult=1
+		
+        if sresult==0:
+            if user:
+                create_log('INFO', 'badge', 'scan_fail', f"Unauthorized '{user.username}'", None, None, nfc_id)
+            else:
+                create_log('INFO', 'badge', 'scan_fail', f"Unknown badge '{nfc_id}'", None, None, nfc_id)
+        else:
+            create_log('INFO', 'badge', 'scan_success', f"Authorized '{user.username}'", None, None, nfc_id)
 
         response = current_app.response_class(
             response=json.dumps(payload),
