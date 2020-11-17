@@ -4,6 +4,7 @@ import enum, logging
 from flask import current_app
 
 from mcp import db, ma
+from mcp.config import Config, settings
 from mcp.main.models import BaseModel
 
 
@@ -16,6 +17,10 @@ class WildapricotUser(BaseModel):
     wildapricot_user_id = db.Column(db.Integer, nullable=True)
     mcp_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
+    def url(self):
+        sub = settings.get('wildapricot', 'subdomain')
+        url = f"https://{sub}.wildapricot.org/admin/contacts/details/?contactId={self.wildapricot_user_id}"
+        return url
 
 class WildapricotGroup(BaseModel):
     """
