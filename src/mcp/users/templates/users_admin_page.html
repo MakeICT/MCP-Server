@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
   <div class="">
+    {% include '_render_form.html' %}
+  </div>
+  <div class="">
     {% for user in users %}
        <div class="card">
           <div class="card-body p-0 pl-2 py-1 m-0">

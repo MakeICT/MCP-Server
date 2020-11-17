@@ -6,10 +6,14 @@ from marshmallow import pprint
 from mcp import db
 from mcp.users.models import User, user_schema, users_schema
 from mcp.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
-                             RequestResetForm, ResetPasswordForm)
+                             RequestResetForm, ResetPasswordForm, UserSearchForm)
 from mcp.users.utils import save_picture
 from mcp.groups.models import Group
 from mcp.config import Config
+
+from sqlalchemy import or_
+from werkzeug.exceptions import BadRequestKeyError
+
 
 users = Blueprint('users', __name__, template_folder='templates')
 
@@ -82,18 +86,34 @@ def reset_token(token):
                            form=form)
 
 
-@users.route("/admin/users")
+@users.route("/admin/users", methods=['GET', 'POST'])
 @roles_required("admin")
 def adm_users():
     page = request.args.get('page', 1, type=int)
-    users = User.query.order_by(User.last_name.asc()).paginate(page, 10, False)
-    next_url = url_for('users.adm_users', page=users.next_num) \
+    qfilter = None
+    try:
+        qfilter = request.form['query']
+        page = 1
+    except BadRequestKeyError:
+        pass
+    if not qfilter:
+        qfilter = request.args.get('filter')
+
+    if qfilter:
+        users = User.query.filter(or_(User.email.like('%'+qfilter+'%'),
+                                      User.first_name.like('%'+qfilter+'%'),
+                                      User.last_name.like('%'+qfilter+'%'),)) \
+                .order_by(User.last_name.asc()).paginate(page, 100, False)
+    else:
+        users = User.query.order_by(User.last_name.asc()).paginate(page, 20, False)
+    next_url = url_for('users.adm_users', page=users.next_num, filter=qfilter) \
         if users.has_next else None
-    prev_url = url_for('users.adm_users', page=users.prev_num) \
+    prev_url = url_for('users.adm_users', page=users.prev_num, filter=qfilter) \
         if users.has_prev else None
+
     return render_template('users_admin_page.html', title="Users",
                            users=users.items, page=page, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, form=UserSearchForm())
 
 
 @users.route("/admin/user/<user_id>", methods=['GET', 'POST'])
