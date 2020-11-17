@@ -81,6 +81,8 @@ def pull_users(user_ids=None, updated_since=None):
                 wa_ids.append(wa_id)
             except IndexError:
                 continue
+        if user_ids and not wa_ids:  #  MCP ids were provided but no corresponding WA ids were found
+            return False
         if wa_ids:
             if query_filter:
                 query_filter += "%20AND%20"
@@ -182,8 +184,48 @@ def pull_users(user_ids=None, updated_since=None):
     return True
 
 
-@wildapricot.route("/rpc/wildapricot/sync", methods=['POST'])
-def rpc_wildapricot_sync():
+def push_users(user_ids):
+    for user_id in user_ids:
+        mcp_user = User.query.get(user_id)
+        try:
+            wa_contact = WA_API.GetContactById(WildapricotUser.query.filter_by(mcp_user_id=user_id)[0].wildapricot_user_id)
+        except IndexError:  # MCP user is not associated with a WA contact
+            return False
+
+        if not WildapricotUser.query.filter_by(wildapricot_user_id=wa_contact['Id']):
+            continue
+
+        groups_from_wa = [group.mcp_group_id for group in WildapricotGroup.query.all()]
+
+        print(wa_contact)
+
+        # Set Wildapricot Groups
+        wa_group_ids = []
+        for group in mcp_user.groups:
+            if group.id in groups_from_wa:
+                wa_group_id = WildapricotGroup.query.join(Group).filter(Group.id==group.id).first().id
+                wa_group_ids.append(wa_group_id)
+        # WA_API.SetMemberGroups(wa_contact['Id'], wa_group_ids, append=False)
+        
+        wa_contact['FirstName'] = mcp_user.first_name
+        wa_contact['LastName'] = mcp_user.last_name
+        wa_contact['Email'] = mcp_user.email
+        for field in wa_contact['FieldValues']:
+            if field['FieldName'] == 'DOB':
+                field['Value'] = WA_API.DateTimeToWADate(mcp_user.birthdate)
+            if field['FieldName'] == 'KeyID':
+                field['Value'] = mcp_user.nfc_id
+            if field["SystemCode"] == "Groups":
+                field["Value"].clear()
+                for group_id in wa_group_ids:
+                    field["Value"].append({'Id': group_id})
+
+        WA_API.UpdateContact(wa_contact['Id'], wa_contact)
+
+        return True
+
+@wildapricot.route("/rpc/wildapricot/pull", methods=['POST'])
+def rpc_wildapricot_pull():
     if request.method == 'POST':
         pull_groups()
 
@@ -198,6 +240,32 @@ def rpc_wildapricot_sync():
                 updated_since = datetime.today() - timedelta(days=json_data['updated_since'])
         # updated_since = datetime.today()-timedelta(days=1)
         if pull_users(user_ids=user_ids, updated_since=updated_since):
+            data = {'status': 'success'}
+            status = 200
+        else:
+            data = {'status': 'failure'}
+            status = 400
+
+        response = current_app.response_class(
+            response=json.dumps(data),
+            status=status,
+            mimetype='application/json'
+        )
+
+        return response
+
+
+@wildapricot.route("/rpc/wildapricot/push", methods=['POST'])
+def rpc_wildapricot_push():
+    if request.method == 'POST':
+        pull_groups()
+
+        json_data = request.get_json()
+        user_ids = None
+        if json_data:
+            if 'user_ids' in json_data.keys():
+                user_ids = json_data['user_ids']
+        if push_users(user_ids=user_ids):
             data = {'status': 'success'}
             status = 200
         else:
