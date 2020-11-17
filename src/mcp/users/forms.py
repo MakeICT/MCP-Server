@@ -74,6 +74,7 @@ class UpdateAccountForm(FlaskForm):
                             validators=[DataRequired()])
     birthdate = DateField('Birthdate',
                           validators=[DataRequired()])
+    active = BooleanField('Active')
     picture = FileField('Profile Picture',
                         validators=[FileAllowed(['jpg', 'png'])])
     nfc_id = StringField('NFC ID')
@@ -112,6 +113,7 @@ class UpdateAccountForm(FlaskForm):
         self.last_name.data = user.last_name
         self.birthdate.data = user.birthdate
         self.nfc_id.data = user.nfc_id
+        self.active.data = user.active
 
     def fill_user(self, user):
         if self.picture.data:
@@ -123,6 +125,7 @@ class UpdateAccountForm(FlaskForm):
         user.last_name = self.last_name.data
         user.birthdate = self.birthdate.data
         user.nfc_id = self.nfc_id.data
+        user.active = self.active.data
         user.groups = [Group.query.filter_by(name=g_name).first()
                        for g_name in self.groups.data]
 
