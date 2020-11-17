@@ -17,7 +17,7 @@ logs = Blueprint('logs', __name__, template_folder='templates')
 @roles_required("admin")
 def adm_logs():
     page = request.args.get('page', 1, type=int)
-    logs = Log.query.order_by(Log.created_date.asc()).paginate(page, 25, False)
+    logs = Log.query.order_by(Log.created_date.desc()).paginate(page, 25, False)
     next_url = url_for('logs.adm_logs', page=logs.next_num) \
         if logs.has_next else None
     prev_url = url_for('logs.adm_logs', page=logs.prev_num) \
