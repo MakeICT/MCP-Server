@@ -23,7 +23,7 @@ function wa_push(data={}) {
   .then(response => response.json())
   .then(jsonData => {document.getElementById("result").innerHTML = jsonData["status"];
                       if (jsonData["status"] == "success") {
-                          wa_sync(data);
+                          wa_pull(data);
                       }
                     })
   .catch(error => console.error('Error:', error));
