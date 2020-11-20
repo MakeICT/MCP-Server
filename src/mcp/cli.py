@@ -18,19 +18,6 @@ def register(app):
         os.system('python -W ignore::DeprecationWarning tests.py')
 
     @test.command()
-    def default():
-        admin_role = Role(name='admin')
-        db.session.add(admin_role)
-
-        admin = User(first_name="Default", last_name="Admin",
-                     email="testuser+admin@makeict.org", username="admin",
-                     email_confirmed_at=datetime.utcnow(), roles=[admin_role])
-        admin.set_password('admin')
-        db.session.add(admin)
-
-        db.session.commit()
-
-    @test.command()
     def reset():
         if os.path.exists('mcp/site.db'):
             os.system('rm mcp/site.db')
@@ -91,6 +78,23 @@ def register(app):
 
         admin = User(first_name="Ryan", last_name="Fisher",
                      email="testuser+admin@makeict.org", username="admin",
+                     email_confirmed_at=datetime.utcnow(), roles=[admin_role])
+        admin.set_password('admin')
+        db.session.add(admin)
+
+        db.session.commit()
+
+    def setup():
+        """Commands for setting up the server."""
+        pass
+
+    @setup.command()
+    def default():
+        admin_role = Role(name='admin')
+        db.session.add(admin_role)
+
+        admin = User(first_name="Default", last_name="Admin",
+                     email="default@admin.org", username="admin",
                      email_confirmed_at=datetime.utcnow(), roles=[admin_role])
         admin.set_password('admin')
         db.session.add(admin)
