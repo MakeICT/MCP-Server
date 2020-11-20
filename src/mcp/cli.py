@@ -84,6 +84,7 @@ def register(app):
 
         db.session.commit()
 
+    @app.cli.group()
     def setup():
         """Commands for setting up the server."""
         pass
