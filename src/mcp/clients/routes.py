@@ -89,11 +89,11 @@ def api_verify_nfc(client_id, nfc_id):
 		
         if sresult==0:
             if user:
-                create_log('INFO', 'badge', 'scan_fail', f"Unauthorized '{user.username}'", None, None, nfc_id)
+                create_log('INFO', 'Client', 'Reject', f"Unauthorized '{user.username}' at {client.name}", user, None, nfc_id)
             else:
-                create_log('INFO', 'badge', 'scan_fail', f"Unknown badge '{nfc_id}'", None, None, nfc_id)
+                create_log('INFO', 'Client', 'Reject', f"Unknown badge '{nfc_id}' at {client.name}", None, None, nfc_id)
         else:
-            create_log('INFO', 'badge', 'scan_success', f"Authorized '{user.username}'", None, None, nfc_id)
+            create_log('INFO', 'Client', 'Authorize', f"Authorized '{user.username}' at {client.name}", user, None, nfc_id)
 
         response = current_app.response_class(
             response=json.dumps(payload),
