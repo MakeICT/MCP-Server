@@ -103,3 +103,23 @@ def api_verify_nfc(client_id, nfc_id):
         print(json.dumps(payload))
 
         return response
+
+
+@clients.route("/api/clients/<client_id>/deauthorize", methods=['GET'])
+# @login_required
+def api_client_deauthorize(client_id):
+    status = 200
+    client = Client.query.get(client_id)
+
+    if not client:
+        status = 404
+
+    create_log('INFO', 'Client', 'De-authorize', f"De-authorized {client.name}", None, None, None)
+
+    response = current_app.response_class(
+        response=json.dumps('{}'),
+        status=status,
+        mimetype='application/json'
+    )
+
+    return response
