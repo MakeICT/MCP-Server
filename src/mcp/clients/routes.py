@@ -81,8 +81,8 @@ def api_verify_nfc(client_id, nfc_id):
         payload = {'authorized': 'false'}
         status = 200
         sresult=0
+        client = Client.query.get(client_id)
         if user and user.active:
-            client = Client.query.get(client_id)
             if any(group in client.groups for group in user.groups):
                 payload['authorized'] = 'true'
                 sresult=1
