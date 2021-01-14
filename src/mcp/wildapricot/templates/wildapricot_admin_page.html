@@ -19,6 +19,19 @@
       </span>
   </div>
   <div id=result>
+  {% if unsynced_users %}
+  <h3>Users with local changes</h3>
+
+    <div class="content-section">
+        {% for u in unsynced_users %}
+        <div><a href="{{ url_for('users.adm_user', user_id=u.id) }}">{{ u.last_name }}, {{ u.first_name }}</a> : {{ u.modified_date }}</div>
+      {% endfor%}
+    </div>
+
+    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="wa_push({user_ids:{{ unsynced_users | selectattr('id') | map(attribute='id') | list}}})">
+        Push All
+    </button>
+  {% endif %}
 
   </div>
 {% endblock content %}

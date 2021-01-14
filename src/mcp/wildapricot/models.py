@@ -16,6 +16,7 @@ class WildapricotUser(BaseModel):
 
     wildapricot_user_id = db.Column(db.Integer, nullable=True)
     mcp_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    last_sync_time = db.Column(db.DateTime, nullable=True)
 
     def url(self):
         sub = settings.get('wildapricot', 'subdomain')

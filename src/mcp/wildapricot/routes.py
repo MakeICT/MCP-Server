@@ -27,7 +27,17 @@ WA_API.authenticate_with_apikey(settings.get('wildapricot', 'api_key'))
 @wildapricot.route("/admin/wildapricot", methods=['GET', 'POST'])
 @roles_required("admin")
 def adm_wildapricot():
-    return render_template('wildapricot_admin_page.html', title="Wildapricot")
+    users = []
+    # get users who have local changes that haven't been synced to WA
+    updated_users = WildapricotUser.query.join(User, WildapricotUser.mcp_user_id==User.id)\
+            .add_columns(User.modified_date, User.id, WildapricotUser.last_sync_time, WildapricotUser.mcp_user_id)\
+            .filter(User.modified_date > WildapricotUser.last_sync_time)
+    for wa_user in updated_users:
+        mcp_user = User.query.get(wa_user.mcp_user_id)
+        print(mcp_user.email)
+        users.append(mcp_user)
+        
+    return render_template('wildapricot_admin_page.html', title="Wildapricot", unsynced_users=users)
 
 def pull_groups():
     wa_groups = WA_API.GetMemberGroups()
@@ -108,10 +118,13 @@ def pull_users(user_ids=None, updated_since=None):
         for field in contact['FieldValues']:
             flattened_fields[field['FieldName']] = field['Value']
 
+        wa_user = None
+
         if contact['Id'] in previously_synced_user_ids:
             print('Updating previously synced user')
             # print(contact)
-            mcp_user = User.query.get(WildapricotUser.query.filter_by(wildapricot_user_id=contact['Id'])[0].mcp_user_id)
+            wa_user = WildapricotUser.query.filter_by(wildapricot_user_id=contact['Id'])[0]
+            mcp_user = User.query.get(wa_user.mcp_user_id)
         else:
             default_username = contact['FirstName'] + contact['LastName'] + str(contact['Id'])
             print(f"Creating new user {default_username}")
@@ -149,6 +162,7 @@ def pull_users(user_ids=None, updated_since=None):
                 mcp_user.active = True
 
         if is_new_user:
+            mcp_user.last_sync_time = datetime.now()
             db.session.add(mcp_user)
             db.session.commit()
 
@@ -164,10 +178,11 @@ def pull_users(user_ids=None, updated_since=None):
 
         if is_new_user:
             # Create a database entry to link the MCP user id with the WA user id
-            new_wa_user = WildapricotUser(id=contact['Id'])
-            new_wa_user.wildapricot_user_id = contact['Id']
-            new_wa_user.mcp_user_id = mcp_user.id
-            db.session.add(new_wa_user)
+            wa_user = WildapricotUser(id=contact['Id'])
+            wa_user.wildapricot_user_id = contact['Id']
+            wa_user.mcp_user_id = mcp_user.id
+            wa_user.last_sync_time = datetime.now()
+            db.session.add(wa_user)
         else:
             # Remove the user from any WA groups that they are no longer a part of
             groups_from_wa = [group.mcp_group_id for group in WildapricotGroup.query.all()]
@@ -179,6 +194,8 @@ def pull_users(user_ids=None, updated_since=None):
                     if not wa_group_id in synced_wa_group_ids:
                         group.rm_user(mcp_user)
                         print(f"Removing {mcp_user.first_name} {mcp_user.last_name} from {group.name}")
+
+        wa_user.last_sync_time = datetime.now()
 
         db.session.commit()
 
@@ -222,6 +239,8 @@ def push_users(user_ids):
                     field["Value"].append({'Id': group_id})
 
         WA_API.UpdateContact(wa_contact['Id'], wa_contact)
+        wa_user = WildapricotUser.query.filter_by(wildapricot_user_id=wa_contact['Id'])[0]
+        wa_user.last_sync_time = datetime.now()
 
         return True
 
