@@ -77,6 +77,7 @@ class UpdateAccountForm(FlaskForm):
     active = BooleanField('Active')
     picture = FileField('Profile Picture',
                         validators=[FileAllowed(['jpg', 'png'])])
+    background_check_date = DateField('Background Check')
     nfc_id = StringField('NFC ID')
 
     if groups_imported:
@@ -114,6 +115,7 @@ class UpdateAccountForm(FlaskForm):
         self.birthdate.data = user.birthdate
         self.nfc_id.data = user.nfc_id
         self.active.data = user.active
+        self.background_check_date.data = user.background_check_date
 
     def fill_user(self, user):
         if self.picture.data:
@@ -128,6 +130,7 @@ class UpdateAccountForm(FlaskForm):
         user.active = self.active.data
         user.groups = [Group.query.filter_by(name=g_name).first()
                        for g_name in self.groups.data]
+        user.background_check_date = self.background_check_date.data
 
 class RequestResetForm(FlaskForm):
     email = StringField('Email',

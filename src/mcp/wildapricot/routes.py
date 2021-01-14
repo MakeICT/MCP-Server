@@ -145,6 +145,8 @@ def pull_users(user_ids=None, updated_since=None):
             mcp_user.birthdate = WA_API.WADateToDateTime(flattened_fields['DOB'])
         if flattened_fields['KeyID']:
             mcp_user.nfc_id = flattened_fields['KeyID']
+        if flattened_fields['Background Check Date']:
+            mcp_user.background_check_date = flattened_fields['Background Check Date']
 
         # Set active status
         mcp_user.active = False
@@ -237,6 +239,10 @@ def push_users(user_ids):
                 field["Value"].clear()
                 for group_id in wa_group_ids:
                     field["Value"].append({'Id': group_id})
+            if field['FieldName'] == "Background Check Date":
+                field['Value'] = WA_API.DateTimeToWADate(
+                                     mcp_user.background_check_date)
+
 
         WA_API.UpdateContact(wa_contact['Id'], wa_contact)
         wa_user = WildapricotUser.query.filter_by(wildapricot_user_id=wa_contact['Id'])[0]

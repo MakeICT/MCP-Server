@@ -33,6 +33,7 @@ class User(BaseModel, UserMixin):
     password = db.Column(db.String(60), nullable=False, server_default='')
     nfc_id = db.Column(db.String(20), nullable=True, default=None, unique=True)
     join_date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+    background_check_date = db.Column(db.DateTime, nullable=True)
     last_seen = db.Column(db.DateTime)
 
     active = db.Column('is_active', db.Boolean(), nullable=False,
