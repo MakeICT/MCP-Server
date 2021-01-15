@@ -7,7 +7,7 @@ from wtforms import (StringField, PasswordField, SubmitField, BooleanField,
 
 
 from wtforms.validators import (DataRequired, Length, Email, EqualTo,
-                                ValidationError)
+                                ValidationError, Optional)
 
 from mcp.users.models import User
 from mcp.main.forms import select_multi_checkbox
@@ -73,11 +73,11 @@ class UpdateAccountForm(FlaskForm):
     last_name = StringField('Last Name',
                             validators=[DataRequired()])
     birthdate = DateField('Birthdate',
-                          validators=[DataRequired()])
+                          validators=[Optional()])
     active = BooleanField('Active')
     picture = FileField('Profile Picture',
                         validators=[FileAllowed(['jpg', 'png'])])
-    background_check_date = DateField('Background Check')
+    background_check_date = DateField('Background Check', validators=[Optional()])
     nfc_id = StringField('NFC ID')
 
     if groups_imported:

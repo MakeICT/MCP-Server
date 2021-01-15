@@ -231,7 +231,7 @@ def push_users(user_ids):
         wa_contact['LastName'] = mcp_user.last_name
         wa_contact['Email'] = mcp_user.email
         for field in wa_contact['FieldValues']:
-            if field['FieldName'] == 'DOB':
+            if field['FieldName'] == 'DOB' and mcp_user.birthdate:
                 field['Value'] = WA_API.DateTimeToWADate(mcp_user.birthdate)
             if field['FieldName'] == 'KeyID':
                 field['Value'] = mcp_user.nfc_id
@@ -240,8 +240,9 @@ def push_users(user_ids):
                 for group_id in wa_group_ids:
                     field["Value"].append({'Id': group_id})
             if field['FieldName'] == "Background Check Date":
-                field['Value'] = WA_API.DateTimeToWADate(
-                                     mcp_user.background_check_date)
+                if mcp_user.background_check_date:
+                    field['Value'] = WA_API.DateTimeToWADate(
+                                        mcp_user.background_check_date)
 
 
         WA_API.UpdateContact(wa_contact['Id'], wa_contact)
