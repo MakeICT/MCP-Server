@@ -1,4 +1,6 @@
 from datetime import datetime
+import copy
+
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
@@ -118,6 +120,7 @@ class UpdateAccountForm(FlaskForm):
         self.background_check_date.data = user.background_check_date
 
     def fill_user(self, user):
+        original_user = copy.copy(user)
         if self.picture.data:
             picture_file = save_picture(self.picture.data)
             user.image_file = picture_file
@@ -126,11 +129,19 @@ class UpdateAccountForm(FlaskForm):
         user.first_name = self.first_name.data
         user.last_name = self.last_name.data
         user.birthdate = self.birthdate.data
-        user.nfc_id = self.nfc_id.data
+        user.nfc_id = self.nfc_id.data if self.nfc_id.data else None
         user.active = self.active.data
-        user.groups = [Group.query.filter_by(name=g_name).first()
-                       for g_name in self.groups.data]
-        user.background_check_date = self.background_check_date.data
+        user.set_groups([Group.query.filter_by(name=g_name).first()
+                        for g_name in self.groups.data])
+        # datetime conversion is a workaround for the equality function because the database object stores background check as datetime
+        if self.background_check_date.data:
+            user.background_check_date = datetime.combine(self.background_check_date.data, datetime.min.time())
+        
+        if user == original_user:
+            print("No changes")
+        else:
+            user.set_updated_date()
+            print("Change detected")
 
 class RequestResetForm(FlaskForm):
     email = StringField('Email',

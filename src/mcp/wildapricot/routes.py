@@ -30,8 +30,8 @@ def adm_wildapricot():
     users = []
     # get users who have local changes that haven't been synced to WA
     updated_users = WildapricotUser.query.join(User, WildapricotUser.mcp_user_id==User.id)\
-            .add_columns(User.modified_date, User.id, WildapricotUser.last_sync_time, WildapricotUser.mcp_user_id)\
-            .filter(User.modified_date > WildapricotUser.last_sync_time)
+            .add_columns(User.updated_date, User.id, WildapricotUser.last_sync_time, WildapricotUser.mcp_user_id)\
+            .filter(User.updated_date > WildapricotUser.last_sync_time)
     for wa_user in updated_users:
         mcp_user = User.query.get(wa_user.mcp_user_id)
         print(mcp_user.email)
@@ -164,7 +164,7 @@ def pull_users(user_ids=None, updated_since=None):
                 mcp_user.active = True
 
         if is_new_user:
-            mcp_user.last_sync_time = datetime.now()
+            mcp_user.last_sync_time = datetime.utcnow()
             db.session.add(mcp_user)
             db.session.commit()
 
@@ -183,7 +183,7 @@ def pull_users(user_ids=None, updated_since=None):
             wa_user = WildapricotUser(id=contact['Id'])
             wa_user.wildapricot_user_id = contact['Id']
             wa_user.mcp_user_id = mcp_user.id
-            wa_user.last_sync_time = datetime.now()
+            wa_user.last_sync_time = datetime.utcnow()
             db.session.add(wa_user)
         else:
             # Remove the user from any WA groups that they are no longer a part of
@@ -197,7 +197,7 @@ def pull_users(user_ids=None, updated_since=None):
                         group.rm_user(mcp_user)
                         print(f"Removing {mcp_user.first_name} {mcp_user.last_name} from {group.name}")
 
-        wa_user.last_sync_time = datetime.now()
+        wa_user.last_sync_time = datetime.utcnow()
 
         db.session.commit()
 
@@ -247,7 +247,7 @@ def push_users(user_ids):
 
         WA_API.UpdateContact(wa_contact['Id'], wa_contact)
         wa_user = WildapricotUser.query.filter_by(wildapricot_user_id=wa_contact['Id'])[0]
-        wa_user.last_sync_time = datetime.now()
+        wa_user.last_sync_time = datetime.utcnow()
 
         return True
 

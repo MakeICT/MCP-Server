@@ -24,7 +24,7 @@
 
     <div class="content-section">
         {% for u in unsynced_users %}
-        <div><a href="{{ url_for('users.adm_user', user_id=u.id) }}">{{ u.last_name }}, {{ u.first_name }}</a> : {{ u.modified_date }}</div>
+        <div><a href="{{ url_for('users.adm_user', user_id=u.id) }}">{{ u.last_name }}, {{ u.first_name }}</a> : {{ u.updated_date }}</div>
       {% endfor%}
     </div>
 

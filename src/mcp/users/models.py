@@ -38,9 +38,27 @@ class User(BaseModel, UserMixin):
 
     active = db.Column('is_active', db.Boolean(), nullable=False,
                        server_default='1')
+    updated_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     roles = db.relationship('Role', secondary='user_roles')
+
+    def __eq__(self, user2):
+        if not isinstance(user2, User):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+
+        for item in self.__dict__:
+            if item == '_sa_instance_state':
+                continue
+            if getattr(self, item) != getattr(user2, item):
+                # print(f"{item} : {getattr(self, item)} : {getattr(user2, item)} ")
+                return False
+
+        return True
+
+    def set_updated_date(self):
+        self.updated_date = datetime.utcnow()
 
     def set_password(self, password):
         hashed_password = bcrypt.generate_password_hash(password) \
@@ -75,6 +93,7 @@ class User(BaseModel, UserMixin):
         """
         if group not in self.groups:
             self.groups.append(group)
+            self.set_updated_date()
 
     def rm_group(self, group):
         """
@@ -82,9 +101,18 @@ class User(BaseModel, UserMixin):
         """
         try:
             self.groups.remove(group)
+            self.set_updated_date()
         except ValueError:
             pass
 
+    def set_groups(self, groups):
+        """
+        set the user's groups.
+        """
+        if not self.groups == groups:
+            self.groups = groups
+            self.set_updated_date()
+            
     def __repr__(self):
         return(f"User('{self.username}', '{self.email}', "
                f"'{self.image_file}', '{self.join_date}')")
