@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, Blueprint
-from flask_user import login_required, roles_required
+from flask_user import login_required, roles_required, current_user
 
 main = Blueprint('main', __name__, template_folder='templates')
 
@@ -7,6 +7,12 @@ main = Blueprint('main', __name__, template_folder='templates')
 @main.route("/")
 @main.route("/home")
 def home():
+    try:
+        if 'admin' in [role.name for role in current_user.roles]:
+            return redirect(url_for('main.admin_dashboard'))
+    except AttributeError:
+        pass
+
     return render_template('home.html', title='Home')
 
 
