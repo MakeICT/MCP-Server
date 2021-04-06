@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_user import (roles_required, login_required, current_user)
-from datetime import datetime
+from datetime import datetime, timedelta
 from marshmallow import pprint
 
 from mcp import db
@@ -20,7 +20,7 @@ users = Blueprint('users', __name__, template_folder='templates')
 
 @users.before_app_request
 def before_request():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and datetime.utcnow() - current_user.last_seen > timedelta(minutes=1):
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
 
