@@ -32,7 +32,7 @@ if useHtml5Fields:
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
-                           validators=[DataRequired(), Length(min=2, max=20)])
+                           validators=[DataRequired(), Length(min=2, max=50)])
     email = StringField('Email',
                         validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -65,7 +65,7 @@ class LoginForm(FlaskForm):
 class UpdateAccountForm(FlaskForm):
     user = current_user
     username = StringField('Username',
-                           validators=[DataRequired(), Length(min=2, max=20)])
+                           validators=[DataRequired(), Length(min=2, max=50)])
     email = StringField('Email',
                         validators=[DataRequired(), Email()])
     first_name = StringField('First Name',
