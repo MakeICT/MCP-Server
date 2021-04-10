@@ -10,6 +10,7 @@ from flask_user import UserManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
+from flask_sockets import Sockets
 
 from mcp.config import Config
 
@@ -19,6 +20,8 @@ ma = Marshmallow()
 migrate = Migrate()
 bcrypt = Bcrypt()
 mail = Mail()
+sockets = Sockets()
+
 user_manager = None  # FIXME: this could probably be done better?
 
 
@@ -31,6 +34,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     mail.init_app(app)
+    sockets.init_app(app)
 
     from mcp.users.models import User
     user_manager = UserManager(app, db, User)
