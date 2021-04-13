@@ -6,12 +6,14 @@ from mcp import db
 from mcp.users.models import User
 from mcp.clients.models import Client
 from mcp.clients.forms import EditClient
+from mcp.clients.functions import verify_nfc
 
 from mcp.config import Config
 from mcp.logs.routes import create_log
 from mcp.groups.models import Group
 
 clients = Blueprint('clients', __name__, template_folder='templates')
+
 
 
 @clients.route("/admin/clients", methods=['GET'])
@@ -74,33 +76,19 @@ def adm_rm_client(client_id):
 # @login_required
 def api_verify_nfc(client_id, nfc_id):
     if request.method == 'GET':
-        print( client_id)
-        print( nfc_id ) 
-        user = User.query.filter_by(nfc_id=nfc_id).first()
-        print (user)
         payload = {'authorized': 'false'}
         status = 200
-        sresult=0
-        client = Client.query.get(client_id)
-        if user and user.active:
-            if any(group in client.groups for group in user.groups):
-                payload['authorized'] = 'true'
-                sresult=1
-		
-        if sresult==0:
-            if user:
-                create_log('INFO', 'Client', 'Reject', f"Unauthorized '{user.username}' at {client.name}", user, None, nfc_id)
-            else:
-                create_log('INFO', 'Client', 'Reject', f"Unknown badge '{nfc_id}' at {client.name}", None, None, nfc_id)
-        else:
-            create_log('INFO', 'Client', 'Authorize', f"Authorized '{user.username}' at {client.name}", user, None, nfc_id)
+        authorized = verify_nfc(client_id, nfc_id)
+
+        if authorized:
+            payload['authorized'] = 'true'
 
         response = current_app.response_class(
             response=json.dumps(payload),
             status=status,
             mimetype='application/json'
         )
-        print(json.dumps(payload))
+        # print(json.dumps(payload))
 
         return response
 
