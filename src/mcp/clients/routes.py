@@ -1,8 +1,9 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint, json, current_app
 from flask_user import (roles_required, login_required, current_user)
-from datetime import datetime
+from datetime import datetime, timedelta
+from gevent import Timeout
 
-from mcp import db
+from mcp import db, sockets
 from mcp.users.models import User
 from mcp.clients.models import Client
 from mcp.clients.forms import EditClient
@@ -111,3 +112,35 @@ def api_client_deauthorize(client_id):
     )
 
     return response
+
+@sockets.route("/clients/socket")
+def echo_socket(ws):
+    print("Socket opened")
+    last_message_time = datetime.utcnow()
+    while not ws.closed:
+        message = None
+        with Timeout(60, False) as timeout:
+            message = ws.receive()
+        print("Receive?")
+        if(message):
+            last_message_time = datetime.utcnow()
+            print(message)
+            message = json.loads(message)
+            response = {}
+            if message['message'] == 'start':
+                print("New client connection!")
+                response = {"message": 'ack'}
+            if message['message'] == 'heartbeat':
+                print("Heartbeat detected!")
+                response = {"message": 'ack'}
+            elif message['message'] == 'verify':
+                print("Verifying badge!")
+                response = {"authorized": "false"}
+                if verify_nfc(message['client_id'], message['nfc_id']):
+                    response["authorized"] = "true"
+            print(response)
+            ws.send(json.dumps(response))
+        elif datetime.utcnow() - last_message_time > timedelta(seconds=60):
+            print("Closing websocket due to inactivity")
+            ws.close()
+    print("Socket closed")
