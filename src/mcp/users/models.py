@@ -51,8 +51,11 @@ class User(BaseModel, UserMixin):
         for item in self.__dict__:
             if item == '_sa_instance_state':
                 continue
-            if getattr(self, item) != getattr(user2, item):
-                # print(f"{item} : {getattr(self, item)} : {getattr(user2, item)} ")
+            try:
+                if getattr(self, item) != getattr(user2, item):
+                    # print(f"{item} : {getattr(self, item)} : {getattr(user2, item)} ")
+                    return False
+            except AttributeError:
                 return False
 
         return True
