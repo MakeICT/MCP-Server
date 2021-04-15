@@ -50,14 +50,14 @@ def rpc_wildapricot_pull():
                 updated_since = datetime.today() - timedelta(days=json_data['updated_since'])
         # updated_since = datetime.today()-timedelta(days=1)
 
-        if current_user.get_task_in_progress('mcp.wildapricot.tasks.pull_users'):
+        if current_user.get_task_in_progress('mcp.wildapricot.functions.pull_users_task'):
             flash('A pull task is currently in progress', 'warning')
             data = {'status': 'failure'}
             status = 400
         else:
-            current_user.launch_task('mcp.wildapricot.tasks.pull_users',
+            current_user.launch_task('mcp.wildapricot.functions.pull_users_task',
                                      'Pulling user info from WA: ',
-                                     user_ids, updated_since)
+                                     user_ids=user_ids, updated_since=updated_since)
             db.session.commit()
             data = {'status': 'success'}
             status = 200
@@ -82,14 +82,14 @@ def rpc_wildapricot_push():
             if 'user_ids' in json_data.keys():
                 user_ids = json_data['user_ids']
 
-        if current_user.get_task_in_progress('mcp.wildapricot.tasks.push_users'):
+        if current_user.get_task_in_progress('mcp.wildapricot.functions.push_users_task'):
             flash('A push task is currently in progress', 'warning')
             data = {'status': 'failure'}
             status = 400
         else:
-            current_user.launch_task('mcp.wildapricot.tasks.push_users',
+            current_user.launch_task('mcp.wildapricot.functions.push_users_task',
                                      'Pushing user info to WA: ',
-                                     user_ids)
+                                     user_ids=user_ids)
             db.session.commit()
             data = {'status': 'success'}
             status = 200
