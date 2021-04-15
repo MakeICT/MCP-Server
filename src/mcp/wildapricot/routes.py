@@ -8,7 +8,7 @@ from mcp.users.models import User
 from mcp.logs.models import Log, LogLevel, log_schema
 from mcp.wildapricot.models import WildapricotUser, WildapricotGroup
 from mcp.wildapricot.models import wildapricot_user_schema
-from mcp.wildapricot.functions import pull_groups, pull_users, push_users
+from mcp.wildapricot.functions import pull_groups
 from mcp.config import Config, settings
 from mcp.groups.models import Group
 from mcp.groups.routes import create_group, get_groups
@@ -49,12 +49,18 @@ def rpc_wildapricot_pull():
             if 'updated_since'  in json_data.keys():
                 updated_since = datetime.today() - timedelta(days=json_data['updated_since'])
         # updated_since = datetime.today()-timedelta(days=1)
-        if pull_users(user_ids=user_ids, updated_since=updated_since):
-            data = {'status': 'success'}
-            status = 200
-        else:
+
+        if current_user.get_task_in_progress('mcp.wildapricot.tasks.pull_users'):
+            flash('A pull task is currently in progress', 'warning')
             data = {'status': 'failure'}
             status = 400
+        else:
+            current_user.launch_task('mcp.wildapricot.tasks.pull_users',
+                                     'Pulling user info from WA: ',
+                                     user_ids, updated_since)
+            db.session.commit()
+            data = {'status': 'success'}
+            status = 200
 
         response = current_app.response_class(
             response=json.dumps(data),
@@ -75,12 +81,18 @@ def rpc_wildapricot_push():
         if json_data:
             if 'user_ids' in json_data.keys():
                 user_ids = json_data['user_ids']
-        if push_users(user_ids=user_ids):
-            data = {'status': 'success'}
-            status = 200
-        else:
+
+        if current_user.get_task_in_progress('mcp.wildapricot.tasks.push_users'):
+            flash('A push task is currently in progress', 'warning')
             data = {'status': 'failure'}
             status = 400
+        else:
+            current_user.launch_task('mcp.wildapricot.tasks.push_users',
+                                     'Pushing user info to WA: ',
+                                     user_ids)
+            db.session.commit()
+            data = {'status': 'success'}
+            status = 200
 
         response = current_app.response_class(
             response=json.dumps(data),
