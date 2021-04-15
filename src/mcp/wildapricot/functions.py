@@ -1,19 +1,13 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint, json, current_app
-from flask_user import (roles_required, login_required, current_user)
-from datetime import datetime, timedelta
-from marshmallow import Schema, fields, ValidationError, pre_load
+from datetime import datetime
 
 from mcp import db
 from mcp.users.models import User
-# from mcp.logs.models import Log, LogLevel, log_schema
-from mcp.wildapricot.models import WildapricotUser, WildapricotGroup
-# from mcp.wildapricot.models import wildapricot_user_schema
 from mcp.config import settings
 from mcp.groups.models import Group
-# from mcp.groups.routes import create_group, get_groups
 from mcp.main.tasks import set_task_progress, run_as_task
 
 from .wildapricot_api import WaApiClient
+from mcp.wildapricot.models import WildapricotUser, WildapricotGroup
 
 WA_API = WaApiClient(settings.get('wildapricot', 'client_id'), 
                      settings.get('wildapricot', 'client_secret'))
@@ -41,7 +35,6 @@ def pull_groups():
             # print(f"Creating new group")
             mcp_group = Group()
 
-            
         mcp_group.name = wa_group['Name']
         mcp_group.description = wa_group['Description']
 
@@ -54,7 +47,7 @@ def pull_groups():
             new_wa_group.wildapricot_group_id = wa_group['Id']
             new_wa_group.mcp_group_id = mcp_group.id
             db.session.add(new_wa_group)
-    
+
     db.session.commit()
 
 
@@ -222,7 +215,7 @@ def push_users(user_ids):
                 wa_group_id = WildapricotGroup.query.join(Group).filter(Group.id==group.id).first().id
                 wa_group_ids.append(wa_group_id)
         # WA_API.SetMemberGroups(wa_contact['Id'], wa_group_ids, append=False)
-        
+   
         wa_contact['FirstName'] = mcp_user.first_name
         wa_contact['LastName'] = mcp_user.last_name
         wa_contact['Email'] = mcp_user.email
@@ -245,7 +238,7 @@ def push_users(user_ids):
         wa_user.last_sync_time = datetime.utcnow()
 
         set_task_progress(100)
-            
+
         return True
 
 
