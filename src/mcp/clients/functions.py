@@ -16,6 +16,10 @@ def verify_nfc(client_id, nfc_id):
         if any(group in client.groups for group in user.groups):
             authorized = True
     
+    if not client:
+        create_log('ERROR', 'Client', 'Reject', f"Invalid client ID: {client_id}", user, None, nfc_id)
+        return False
+
     if not authorized:
         if user:
             create_log('INFO', 'Client', 'Reject', f"Unauthorized '{user.username}' at {client.name}", user, None, nfc_id)
