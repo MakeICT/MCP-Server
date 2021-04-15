@@ -1,6 +1,8 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler, SMTPHandler
+from redis import Redis
+import rq
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -38,6 +40,9 @@ def create_app(config_class=Config):
 
     from mcp.users.models import User
     user_manager = UserManager(app, db, User)
+
+    app.redis = Redis.from_url(app.config['REDIS_URL'])
+    app.task_queue = rq.Queue('mcp-tasks', connection=app.redis)
 
     from mcp.users.routes import users
     from mcp.main.routes import main

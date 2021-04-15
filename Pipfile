@@ -22,6 +22,8 @@ gunicorn = "*"
 PyMySQL = "*"
 cryptography = "*"
 Flask-Sockets = "*"
+redis = "*"
+rq = "*"
 
 [requires]
 python_version = "3.7"

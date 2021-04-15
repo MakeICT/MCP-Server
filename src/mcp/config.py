@@ -32,3 +32,5 @@ class Config:
     USER_LOGIN_URL = '/login'
     USER_REGISTER_URL = '/register'
     USER_LOGOUT_URL = '/logout'
+
+    REDIS_URL = 'redis://'
