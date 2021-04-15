@@ -24,6 +24,7 @@ cryptography = "*"
 Flask-Sockets = "*"
 redis = "*"
 rq = "*"
+email-validator = "*"
 
 [requires]
 python_version = "3.7"
