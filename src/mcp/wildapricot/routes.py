@@ -17,6 +17,7 @@ from .wildapricot_api import WaApiClient
 
 wildapricot = Blueprint('wildapricot', __name__, template_folder='templates')
 
+import mcp.wildapricot.cli
 
 @wildapricot.route("/admin/wildapricot", methods=['GET', 'POST'])
 @roles_required("admin")
