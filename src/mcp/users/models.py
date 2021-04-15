@@ -42,6 +42,7 @@ class User(BaseModel, UserMixin):
 
     # Relationships
     roles = db.relationship('Role', secondary='user_roles')
+    tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
     def __eq__(self, user2):
         if not isinstance(user2, User):
@@ -88,6 +89,21 @@ class User(BaseModel, UserMixin):
         except Exception:
             return None
         return User.query.get(user_id)
+
+    def launch_task(self, name, description, *args, **kwargs):
+        rq_job = current_app.task_queue.enqueue(name,
+                                                *args, **kwargs)
+        task = Task(id=rq_job.get_id(), name=name, description=description,
+                    user=self)
+        db.session.add(task)
+        return task
+
+    def get_tasks_in_progress(self):
+        return Task.query.filter_by(user=self, complete=False).all()
+
+    def get_task_in_progress(self, name):
+        return Task.query.filter_by(name=name, user=self,
+                                    complete=False).first()
 
     # Group functions
     def add_group(self, group):
