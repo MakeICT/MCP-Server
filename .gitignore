@@ -3,6 +3,8 @@ mcp/static/profile_pics/*
 config.ini
 
 /logs/
+.vscode/*
 
+*__pycache__*
 *.pyc
 *.swp
