@@ -1,3 +1,6 @@
+import json
+from time import time
+
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
@@ -6,7 +9,7 @@ from flask_user import UserMixin
 from marshmallow import fields
 
 from mcp import db, ma, bcrypt
-from mcp.main.models import BaseModel
+from mcp.main.models import BaseModel, Task
 from mcp.groups.models import groups_schema
 
 
@@ -42,6 +45,8 @@ class User(BaseModel, UserMixin):
 
     # Relationships
     roles = db.relationship('Role', secondary='user_roles')
+    notifications = db.relationship('Notification', backref='user',
+                                    lazy='dynamic')
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
 
     def __eq__(self, user2):
@@ -90,6 +95,12 @@ class User(BaseModel, UserMixin):
             return None
         return User.query.get(user_id)
 
+    def add_notification(self, name, data):
+        self.notifications.filter_by(name=name).delete()
+        n = Notification(name=name, payload_json=json.dumps(data), user=self)
+        db.session.add(n)
+        return n
+
     def launch_task(self, name, description, *args, **kwargs):
         rq_job = current_app.task_queue.enqueue(name,
                                                 *args, **kwargs)
@@ -135,6 +146,17 @@ class User(BaseModel, UserMixin):
     def __repr__(self):
         return(f"User('{self.username}', '{self.email}', "
                f"'{self.image_file}', '{self.join_date}')")
+
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    timestamp = db.Column(db.Float(precision=15), index=True, default=time)
+    payload_json = db.Column(db.Text)
+
+    def get_data(self):
+        return json.loads(str(self.payload_json))
 
 
 class Role(db.Model):

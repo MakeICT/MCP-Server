@@ -2,9 +2,10 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_user import (roles_required, login_required, current_user)
 from datetime import datetime, timedelta
 from marshmallow import pprint
+from flask import jsonify
 
 from mcp import db
-from mcp.users.models import User, user_schema, users_schema
+from mcp.users.models import User, Notification, user_schema, users_schema
 from mcp.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                              RequestResetForm, ResetPasswordForm, UserSearchForm)
 from mcp.users.utils import save_picture
@@ -158,3 +159,15 @@ def api_user(user_id):
         user = user_schema.load(request.data)
         pprint(user)
         return "Sorry, this endpoint isn't finished yet"
+
+@users.route('/api/users/<user_id>/notifications')
+@login_required
+def notifications(user_id):
+    since = request.args.get('since', 0.0, type=float)
+    notifications = current_user.notifications.filter(
+        Notification.timestamp > since).order_by(Notification.timestamp.asc())
+    return jsonify([{
+        'name': n.name,
+        'data': n.get_data(),
+        'timestamp': n.timestamp
+    } for n in notifications])
