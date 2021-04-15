@@ -33,6 +33,54 @@
         $interpolateProvider.endSymbol(']]');
       });
     </script>
+    <script>
+      // ...
+      {% if current_user.is_authenticated %}
+      $(function() {
+        var since = 0;
+        var poll_interval = 1000;
+        var get_notifications = function() {
+            $.ajax('{{ url_for('users.notifications', user_id=current_user.id) }}?since=' + since).done(
+                function(notifications) {
+                    for (var i = 0; i < notifications.length; i++) {
+                      switch (notifications[i].name) {
+                              case 'task_progress':
+                                  set_task_progress(
+                                      notifications[i].data.task_id,
+                                      notifications[i].data.progress,
+                                      notifications[i].data.status);
+                                  if(notifications[i].data.progress < 100)
+                                    poll_interval = 1000;
+                                  else {
+                                    poll_interval = 5000;
+                                    if(since > 0 && notifications[i].data.status !== "failed")
+                                    {
+                                      document.location.reload();
+                                    }
+                                  }
+                                  break;
+                      }
+                      since = notifications[i].timestamp;
+                    }
+                }
+            );
+            setTimeout(get_notifications, poll_interval);
+        };
+        setTimeout(get_notifications, poll_interval);
+      });
+      {% endif %}
+
+      function set_task_progress(task_id, progress, status) {
+          if (status == 'failed') {
+            $('#' + task_id + '-progress').text("FAILED");
+            $('#' + task_id + '-container').removeClass("alert-success");
+            $('#' + task_id + '-container').addClass("alert-danger");
+          }
+          else {
+            $('#' + task_id + '-progress').text(progress + "%");
+          }
+      }
+    </script>
 
     {# *** Allow sub-templates to insert extra html to the head section *** #}
     {# Taken from flas_user_layout template. Probably unnecessary #}
@@ -72,6 +120,19 @@
     <main role="main" class="container">
       <div class="row">
         <div class="col-md-12 p-0 m-0">
+          {% if current_user.is_authenticated %}
+          {% with tasks = current_user.get_tasks_in_progress() %}
+          {% if tasks %}
+              {% for task in tasks %}
+              <div id="{{ task.id }}-container" class="alert alert-success" role="alert">
+                  {{ task.description }}
+                  <span id="{{ task.id }}-progress">{{ task.get_progress() }}%</span>
+              </div>
+              {% endfor %}
+          {% endif %}
+          {% endwith %}
+          {% endif %}
+          
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
               {% for category, message in messages %}
