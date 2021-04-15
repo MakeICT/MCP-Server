@@ -57,7 +57,7 @@ def rpc_wildapricot_pull():
             status = 400
         else:
             current_user.launch_task('mcp.wildapricot.functions.pull_users_task',
-                                     'Pulling user info from WA: ',
+                                     'Pulling user info from WA: ', 300,
                                      user_ids=user_ids, updated_since=updated_since)
             db.session.commit()
             data = {'status': 'success'}
@@ -89,7 +89,7 @@ def rpc_wildapricot_push():
             status = 400
         else:
             current_user.launch_task('mcp.wildapricot.functions.push_users_task',
-                                     'Pushing user info to WA: ',
+                                     'Pushing user info to WA: ', 180,
                                      user_ids=user_ids)
             db.session.commit()
             data = {'status': 'success'}
