@@ -149,7 +149,10 @@ def pull_users(user_ids=None, updated_since=None):
         if is_new_user:
             mcp_user.last_sync_time = datetime.utcnow()
             db.session.add(mcp_user)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except db.exc.PendingRollbackError:
+                db.session.rollback()
 
         synced_wa_group_ids = []
         if 'Group participation' in flattened_fields:
@@ -182,8 +185,10 @@ def pull_users(user_ids=None, updated_since=None):
 
         wa_user.last_sync_time = datetime.utcnow()
 
-        db.session.commit()
-
+        try:
+            db.session.commit()
+        except db.exc.PendingRollbackError:
+            db.session.rollback()
     set_task_progress(100)
     return True
 
