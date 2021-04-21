@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy.exc import PendingRollbackError
 
 from mcp import db
 from mcp.users.models import User
@@ -151,7 +152,7 @@ def pull_users(user_ids=None, updated_since=None):
             db.session.add(mcp_user)
             try:
                 db.session.commit()
-            except db.exc.PendingRollbackError:
+            except PendingRollbackError:
                 db.session.rollback()
 
         synced_wa_group_ids = []
@@ -187,7 +188,7 @@ def pull_users(user_ids=None, updated_since=None):
 
         try:
             db.session.commit()
-        except db.exc.PendingRollbackError:
+        except PendingRollbackError:
             db.session.rollback()
     set_task_progress(100)
     return True
