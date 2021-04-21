@@ -48,7 +48,8 @@
                                   set_task_progress(
                                       notifications[i].data.task_id,
                                       notifications[i].data.progress,
-                                      notifications[i].data.status);
+                                      notifications[i].data.status,
+                                      notifications[i].data.details);
                                   if(notifications[i].data.progress < 100)
                                     poll_interval = 1000;
                                   else {
@@ -70,9 +71,10 @@
       });
       {% endif %}
 
-      function set_task_progress(task_id, progress, status) {
+      function set_task_progress(task_id, progress, status, details) {
           if (status == 'failed') {
             $('#' + task_id + '-progress').text("FAILED");
+            $('#' + task_id + '-details').text(details);
             $('#' + task_id + '-container').removeClass("alert-success");
             $('#' + task_id + '-container').addClass("alert-danger");
           }
@@ -127,7 +129,8 @@
               <div id="{{ task.id }}-container" class="alert alert-success" role="alert">
                   {{ task.description }}
                   <span id="{{ task.id }}-progress">{{ task.get_progress() }}%</span>
-              </div>
+                  <div id="{{ task.id }}-details"></div>
+                </div>
               {% endfor %}
           {% endif %}
           {% endwith %}
