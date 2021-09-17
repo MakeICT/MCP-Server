@@ -1,5 +1,7 @@
 import json
 from time import time
+import redis
+import sys
 
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -102,12 +104,18 @@ class User(BaseModel, UserMixin):
         return n
 
     def launch_task(self, name, description, timeout, *args, **kwargs):
-        rq_job = current_app.task_queue.enqueue(name, job_timeout=timeout,
-                                                *args, **kwargs)
-        task = Task(id=rq_job.get_id(), name=name, description=description,
-                    user=self)
-        db.session.add(task)
-        return task
+        try:
+            rq_job = current_app.task_queue.enqueue(name, job_timeout=timeout,
+                                                    *args, **kwargs)
+            task = Task(id=rq_job.get_id(), name=name, description=description,
+                        user=self)
+            db.session.add(task)
+            
+            return task
+
+        except redis.exceptions.ConnectionError:
+            current_app.logger.error("Could not connect to Redis Server", exc_info=sys.exc_info())
+
 
     def get_tasks_in_progress(self):
         return Task.query.filter_by(user=self, complete=False).all()
