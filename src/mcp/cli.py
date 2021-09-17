@@ -1,23 +1,54 @@
 import os
 import click
 from datetime import datetime
+import sys
+
+from flask import current_app
+from flask.cli import with_appcontext
 
 from mcp import db
+from mcp.logs.models import Log
 from mcp.users.models import User, Role
 from mcp.groups.models import Group
 
+@with_appcontext
+def invoke_with_catch(self, ctx, original_invoke):
+    fmt = dict(command=getattr(ctx, 'command', ctx).name)
+    try:
+        current_app.logger.info(f"Running command '{ctx.command.name}' with params {ctx.params}")
+        result = original_invoke(self, ctx)
+        current_app.logger.debug(f"Completed command '{ctx.command.name}' with params {ctx.params}")
+        return result
+
+    except Exception as exc:
+        current_app.logger.error(f"Command '{ctx.command.name}' failed with exception:", exc_info=sys.exc_info())
+
+        """ In case command invoked from another command """
+        raise click.ClickException(
+            "Failed to invoke {command} command".format(**fmt))
+
+
+class CLICommandInvoker(click.Command):
+    def invoke(self, ctx):
+        return invoke_with_catch(self, ctx, click.Command.invoke)
+
+
+class CLIGroupInvoker(click.Group):
+    def invoke(self, ctx):
+        return invoke_with_catch(self, ctx, click.Group.invoke)
+
 
 def register(app):
-    @app.cli.group()
+    @app.cli.group(cls=CLIGroupInvoker)
     def test():
         """Commands for testing and development."""
         pass
 
-    @test.command()
+    @test.command(cls=CLICommandInvoker)
     def all():
         os.system('python -W ignore::DeprecationWarning tests.py')
 
-    @test.command()
+    @test.command(cls=CLICommandInvoker)
     def reset():
         if os.path.exists('mcp/site.db'):
             os.system('rm mcp/site.db')
