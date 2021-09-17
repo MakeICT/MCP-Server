@@ -7,6 +7,7 @@ Create Date: 2021-04-13 21:11:43.755107
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects.mysql import DOUBLE
 
 
 # revision identifiers, used by Alembic.
@@ -22,11 +23,13 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=128), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('timestamp', sa.Double(), nullable=True),
+    sa.Column('timestamp', DOUBLE(), nullable=True),
     sa.Column('payload_json', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+
+    #ALTER TABLE notification MODIFY COLUMN timestamp double;
     op.create_index(op.f('ix_notification_name'), 'notification', ['name'], unique=False)
     op.create_index(op.f('ix_notification_timestamp'), 'notification', ['timestamp'], unique=False)
     # ### end Alembic commands ###
