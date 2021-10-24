@@ -122,6 +122,9 @@ def register(app):
 
     @setup.command()
     def default():
+        os.system('flask db migrate')
+        os.system('flask db upgrade')
+        
         admin_role = Role(name='admin')
         db.session.add(admin_role)
 
