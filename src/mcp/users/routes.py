@@ -21,9 +21,17 @@ users = Blueprint('users', __name__, template_folder='templates')
 
 @users.before_app_request
 def before_request():
-    if current_user.is_authenticated and datetime.utcnow() - current_user.last_seen > timedelta(minutes=1):
-        current_user.last_seen = datetime.utcnow()
-        db.session.commit()
+    if current_user.is_authenticated:
+        update = False
+        if not current_user.last_seen:
+            update = True
+        else:
+            time_since_seen = datetime.utcnow() - current_user.last_seen
+            if time_since_seen > timedelta(minutes=1):
+                update = True
+        if update:
+            current_user.last_seen = datetime.utcnow()
+            db.session.commit()
 
 
 @users.route("/register", methods=['GET', 'POST'])
