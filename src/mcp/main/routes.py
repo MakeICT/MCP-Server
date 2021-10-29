@@ -10,10 +10,12 @@ def home():
     try:
         if 'admin' in [role.name for role in current_user.roles]:
             return redirect(url_for('main.admin_dashboard'))
+        else:
+            return redirect(url_for('users.login'))
     except AttributeError:
-        pass
+        return redirect(url_for('users.login'))
 
-    return render_template('home.html', title='Home')
+    # return render_template('home.html', title='Home')
 
 
 @main.route("/about")
