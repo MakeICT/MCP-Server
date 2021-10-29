@@ -11,14 +11,17 @@ def verify_nfc(client_id, nfc_id):
     # print(user)
 
     authorized = False
-    client = Client.query.get(client_id)
+    # client = Client.query.get(client_id)
+    client = Client.query.filter_by(client_id=client_id).first()
+ 
+    if not client:
+        create_log('ERROR', 'Client', 'Reject', f"Invalid client ID: {client_id}", user, None, nfc_id)
+        return False
+ 
     if user and user.active:
         if any(group in client.groups for group in user.groups):
             authorized = True
     
-    if not client:
-        create_log('ERROR', 'Client', 'Reject', f"Invalid client ID: {client_id}", user, None, nfc_id)
-        return False
 
     if not authorized:
         if user:
