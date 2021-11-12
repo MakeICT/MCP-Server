@@ -1,99 +1,114 @@
-var video = document.querySelector("#videoElement");
-var frontCamera = false;
-var cameraCount = 0;
-var resultCanvas = document.getElementById('resultCanvas');
-var videoContainer = document.getElementById('videoContainer');
-var resultContext = resultCanvas.getContext('2d');
-var crosshairCanvas = document.getElementById('crosshairCanvas');
-var crosshairContext = crosshairCanvas.getContext('2d');
-var snapshotButton = document.getElementById("snap");
-var retakeButton = document.getElementById("retake");
-var mirrorButton = document.getElementById("mirror");
-var flipButton = document.getElementById("flip");
-var x,y,crop_height,crop_width = 0;
+const file_field = {
+  video: document.getElementById("videoElement"),
+  frontCamera: false,
+  cameraCount: 0,
+  resultCanvas: document.getElementById('resultCanvas'),
+  crosshairCanvas: document.getElementById('crosshairCanvas'),
+  videoContainer: document.getElementById('videoContainer'),
+  cameraModalButton: document.getElementById("photo_button"),
+  snapshotButton: document.getElementById("snap"),
+  retakeButton: document.getElementById("retake"),
+  mirrorButton: document.getElementById("mirror"),
+  flipButton: document.getElementById("flip"),
+  x:0,
+  y:0,
+  crop_height: 600,
+  crop_width: 600,
+};
 
-function setupCrosshair() {
-  console.log(video.videoWidth, video.videoHeight);
-  crosshairCanvas.width = video.videoWidth;
-  crosshairCanvas.height = video.videoHeight;
-  crop_width = 600;
-  crop_height = 600;
-  x = (video.videoWidth - crop_width) * 0.5;
-  y = (video.videoHeight - crop_height) * 0.5;
-  aspectRatio = video.videoWidth/video.videoHeight;
+// let fileFieldInst = new file_field();
+
+function setupCrosshair(ff) {
+  var crosshairContext = ff.crosshairCanvas.getContext('2d');
+  console.log(ff.video.videoWidth, ff.video.videoHeight);
+  ff.crosshairCanvas.width = ff.video.videoWidth;
+  ff.crosshairCanvas.height = ff.video.videoHeight;
+  ff.x = (ff.video.videoWidth - ff.crop_width) * 0.5;
+  ff.y = (ff.video.videoHeight - ff.crop_height) * 0.5;
+  aspectRatio = ff.video.videoWidth/ff.video.videoHeight;
 
   // Adjust video and crosshair containers based on video dimensions
   console.log("aspectRatio: ", aspectRatio);
-  if (Math.abs(aspectRatio - 1) < 0.1)
-    videoContainer.classList = "embed-responsive embed-responsive-1by1";
-  else if (Math.abs(aspectRatio - 1.3333) < 0.1)
-    videoContainer.classList = "embed-responsive embed-responsive-4by3";
-  else if (Math.abs(aspectRatio - 1.7777) < 0.1)
-    videoContainer.classList = "embed-responsive embed-responsive-16by9";
-  else if (Math.abs(aspectRatio - 2.3333) < 0.1)
-    videoContainer.classList = "embed-responsive embed-responsive-21by9";
-  else if (aspectRatio < 1)
-    crosshairCanvas.classList.remove("w-100");
-  else if (aspectRatio > 1)
-    crosshairCanvas.classList.remove("h-100");
+  if (Math.abs(aspectRatio - 1) < 0.1) {
+    ff.videoContainer.classList.add("embed-responsive-1by1");
+  }
+  else if (Math.abs(aspectRatio - 1.3333) < 0.1) {
+    ff.videoContainer.classList.add("embed-responsive-4by3");
+  }
+  else if (Math.abs(aspectRatio - 1.7777) < 0.1) {
+    ff.videoContainer.classList.add("embed-responsive-16by9");
+  }
+  else if (Math.abs(aspectRatio - 2.3333) < 0.1) {
+    ff.videoContainer.classList.add("embed-responsive-21by9");
+  }
+  else {
+    ff.videoContainer.classList.add("embed-responsive-1by1");
+    if (aspectRatio < 1)
+      ff.crosshairCanvas.classList.remove("w-100");
+    else if (aspectRatio > 1)
+      ff.crosshairCanvas.classList.remove("h-100");
+  }
 
   // Draw alignment crosshair
+  console.log(ff.x, ff.y, ff.crop_width, ff.crop_height)
   crosshairContext.strokeStyle = 'rgba(0, 255, 0, 0.5)';
   crosshairContext.lineWidth = 10;
   crosshairContext.beginPath();
-  crosshairContext.rect(x, y, crop_width, crop_height);
+  crosshairContext.rect(ff.x, ff.y, ff.crop_width, ff.crop_height);
   crosshairContext.stroke();
   crosshairContext.beginPath();
-  crosshairContext.arc(video.videoWidth/2, video.videoHeight/2, 5, 0, 2*Math.PI);
+  crosshairContext.arc(ff.video.videoWidth/2, ff.video.videoHeight/2, 5, 0, 2*Math.PI);
   crosshairContext.stroke();
 }
 
-function showResult() {
-  video.hidden = true;
-  crosshairCanvas.hidden = true;
-  resultCanvas.hidden = false;
-  snapshotButton.hidden = true;
-  retakeButton.hidden = false;
-  resultCanvas.width  = crop_width;
-  resultCanvas.height = crop_height;
+function showResult(ff) {
+  var resultContext = ff.resultCanvas.getContext('2d');
 
-  resultContext.drawImage(video, x, y, crop_width, crop_height, 0, 0, crop_width, crop_height);
+  ff.video.hidden = true;
+  ff.crosshairCanvas.hidden = true;
+  ff.resultCanvas.hidden = false;
+  ff.snapshotButton.hidden = true;
+  ff.retakeButton.hidden = false;
+  ff.resultCanvas.width  = ff.crop_width;
+  ff.resultCanvas.height = ff.crop_height;
 
-  var dataURL = resultCanvas.toDataURL("image/png");
-  console.log(dataURL);
+  resultContext.drawImage(ff.video, ff.x, ff.y, ff.crop_width, ff.crop_height, 0, 0, ff.crop_width, ff.crop_height);
+
+  var dataURL = ff.resultCanvas.toDataURL("image/png");
+  // console.log(dataURL);s
 }
 
-function showCamera() {
-  video.hidden = false;
-  crosshairCanvas.hidden = false;
-  resultCanvas.hidden = true;
-  snapshotButton.hidden = false;
-  retakeButton.hidden = true;
+function showCamera(ff) {
+  ff.video.hidden = false;
+  ff.crosshairCanvas.hidden = false;
+  ff.resultCanvas.hidden = true;
+  ff.snapshotButton.hidden = false;
+  ff.retakeButton.hidden = true;
 }
 
-function setupCamera(useFrontCamera) {
+function setupCamera(ff) {
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
     console.log("enumerateDevices() not supported.");
     return;
   }
   
-  cameraCount = 0;
+  ff.cameraCount = 0;
   // List cameras and microphones.
   navigator.mediaDevices.enumerateDevices()
   .then(function(devices) {
     console.log(devices);
     devices.forEach(function(device) {
       if (device.kind === "videoinput") {
-        cameraCount++;
-        console.log(cameraCount);
+        ff.cameraCount++;
+        console.log(ff.cameraCount);
         console.log(device.kind + ": " + device.label +
                     " id = " + device.deviceId);
       }
     });
-    if (cameraCount < 2) {
-      flipButton.hidden = true;
-      console.log("hiding flip button: ", cameraCount )
+    if (ff.cameraCount < 2) {
+      ff.flipButton.hidden = true;
+      console.log("hiding flip button: ", ff.cameraCount )
     }
   })
   .catch(function(err) {
@@ -113,13 +128,13 @@ function setupCamera(useFrontCamera) {
       video: { 
         width: 1280, 
         height: 960, 
-        facingMode: {ideal: useFrontCamera ? "user" : "environment"} 
+        facingMode: {ideal: ff.frontCamera ? "user" : "environment"} 
       },
     }
 
   navigator.mediaDevices.getUserMedia(constraints)
     .then(function (stream) {
-      video.srcObject = stream;
+      ff.video.srcObject = stream;
     })
     .catch(function (error) {
       console.log("Something went wrong!");
@@ -129,58 +144,67 @@ function setupCamera(useFrontCamera) {
 
 }
 // Wait until video stream has loaded before setting up crosshair
-video.addEventListener('loadedmetadata', function(){
-  console.log('loadedmetadata', video.videoWidth, video.videoHeight);
-  setupCrosshair();
+file_field.video.addEventListener('loadedmetadata', function(){
+  console.log('loadedmetadata', file_field.video.videoWidth, file_field.video.videoHeight);
+  setupCrosshair(file_field);
 }, false);
 
-function releaseCamera() {
-  console.log(video.srcObject.getTracks());
-  // video.srcObject.getTracks()[0].stop();
-  video.srcObject.getTracks().forEach(function(track) {
+function releaseCamera(ff) {
+  console.log(ff.video.srcObject.getTracks());
+  // ff.video.srcObject.getTracks()[0].stop();
+  ff.video.srcObject.getTracks().forEach(function(track) {
     track.stop();
   })
 }
 
 // Trigger photo take
-document.getElementById('snap').addEventListener('click', function() {
-  showResult();
+file_field.snapshotButton.addEventListener('click', function() {
+  showResult(file_field);
+});
+
+file_field.crosshairCanvas.addEventListener('click', function() {
+  showResult(file_field);
 });
 
 // Retake photo
-document.getElementById('retake').addEventListener('click', function() {
-  showCamera();
+file_field.retakeButton.addEventListener('click', function() {
+  showCamera(file_field);
+});
+file_field.resultCanvas.addEventListener('click', function() {
+  showCamera(file_field);
 });
 
 // Set up camera
-document.getElementById('photo_button').addEventListener('click', function() {
-  setupCamera(frontCamera);
+file_field.cameraModalButton.addEventListener('click', function() {
+  setupCamera(file_field);
 });
 
 // Invert image
 var mirrorEnabled = false;
-document.getElementById('mirror').addEventListener('click', function() {
-  var v = document.getElementById("videoElement");
-  // mirrorButton.press
+file_field.mirrorButton.addEventListener('click', function() {
   if(!mirrorEnabled) {
-    v.style.setProperty("transform", "scaleX(-1)");
+    file_field.video.style.setProperty("transform", "scaleX(-1)");
   }
   else {
-    v.style.setProperty("transform", "scaleX(1)");
+    file_field.video.style.setProperty("transform", "scaleX(1)");
   }
   mirrorEnabled = !mirrorEnabled;
 });
 
 // Switch camera
-document.getElementById('flip').addEventListener('click', function() {
-  var v = document.getElementById("videoElement");
-  releaseCamera();
-  frontCamera = !frontCamera;
-  setupCamera(frontCamera);
+file_field.flipButton.addEventListener('click', function() {
+  releaseCamera(file_field);
+  file_field.frontCamera = !file_field.frontCamera;
+  setupCamera(file_field);
 });
 
 // Close video stream when modal is hidden
 $('#cameraModal').on('hidden.bs.modal', function () {
   console.log("Camera modal closed");
-  releaseCamera();
+  releaseCamera(file_field);
 });
+
+function syncFilename(fileFieldId) {
+  var doc = document.getElementById(fileFieldId).files[0].name;
+  document.getElementById(fileFieldId + '_fn').innerHTML = doc;
+}

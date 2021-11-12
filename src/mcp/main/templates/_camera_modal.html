@@ -1,0 +1,36 @@
+<style>
+  .on-top{
+    position: absolute;
+    top:0;bottom:0;right:0;left:0;
+    z-index: 2000;
+  }
+</style>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" role="dialog" aria-labelledby="cameraModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cameraModalLabel">Take Photo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="photo-modal-body">
+        <div  class="embed-responsive"  id="videoContainer">
+          <video class="embed-responsive-item border-dark rounded" autoplay="true" id="videoElement"></video>
+          <canvas id="crosshairCanvas" class="w-100 h-100 m-auto on-top"></canvas>
+          <canvas id="resultCanvas" class="h-100 m-auto border border-dark rounded on-top" hidden="true"></canvas>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="snap" class="btn btn-secondary float-left"><i class="fas fa-camera"></i></button>
+        <button type="button" id="retake" class="btn btn-secondary" hidden="true"><i class="fas fa-trash"></i></button>
+        <button type="button" id="mirror" class="btn btn-secondary" data-toggle="button" aria-pressed="true"><i class="fas fa-arrows-alt-h"></i></button>
+        <button type="button" id="flip" class="btn btn-secondary" data-toggle="button" aria-pressed="true"><i class="fas fa-sync-alt"></i></button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

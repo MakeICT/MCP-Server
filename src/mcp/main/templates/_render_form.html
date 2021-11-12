@@ -1,4 +1,39 @@
-<form class="form form-horizontal" method="POST" action="" enctype="multipart/form-data" autocomplete="off">
+{% macro render_file_field(field, label_visible=true, filename=None, folder='', right_url=None, right_label=None, camera=False) -%}{% include '_camera_modal.html' %}
+    {{ field.label(class="form-control-label-sm col-md-2") }}
+    <div class="col-md-10 p-0">
+      <div class="input-group input-group-sm">
+        {{ field(style='display:none', onchange="syncFilename(\'" + field.id +"\')") }} 
+        {% if field.errors %} 
+          <div id="{{ field.id + '_fn' }}" class="form-control form-control-sm is-invalid">{{ filename }}</div>
+        {% else %} 
+          <span id="{{ field.id + '_fn' }}" class="form-control form-control-sm rounded-left">{{ filename }}</span>
+        {% endif %}
+        {% if camera %}
+          <div class="input-group-append">
+            <a id="photo_button" type="button" class="btn btn-secondary btn-sm fas fa-camera text-white" style="line-height: 1.5" data-toggle="modal" data-target="#cameraModal""></a>
+          </div>
+        {% endif%}
+        {% if filename%}
+          <div class="input-group-append">
+            <a id="{{ field.id + '_down_btn' }}" type="button" href="{{ url_for('static', filename= folder + filename)}}" download class="btn btn-secondary btn-sm fas fa-file-download" style="line-height: 1.5"></a>
+          </div>
+        {% endif %}
+          <div class="input-group-append">
+            <button id="{{ field.id + '_btn' }}" type="button" onclick="document.getElementById('{{ field.id }}').click();" class="btn btn-primary btn-sm rounded-right fas fa-file-upload"></button>
+          </div>
+        {% if field.errors %} 
+          <div class="invalid-feedback mt-0 pt-0">
+            {% for error in field.errors %} 
+              <span class="float-right">{{ error }}</span> 
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <script type="text/javascript"> {% include 'form_functions.js' %} </script>  
+{%- endmacro %}
+
+<form  method="POST" action="" enctype="multipart/form-data" autocomplete="off">
     {{ form.hidden_tag() }}
     <fieldset class="form-group">
         <legend class="border-bottom mb-4">{{ title }}</legend>
@@ -32,7 +67,7 @@
                     {% else %}
                         {{ field(class="form-control form-control-sm col-md-10") }}
                     {% endif %}
-                </div>  
+                </div>
 
             {% elif field.type=='BooleanField' %}
                 <div class="form-row">
@@ -47,7 +82,7 @@
                     {% else %}
                         {{ field(class="") }}
                     {% endif %}
-                </div>                    
+                </div>
 
             {% elif field.type=='DateField' %}
                 <div class="form-row">
@@ -80,18 +115,11 @@
                 </div>
 
             {% elif field.type=='FileField' %}
-                <div class="form-row my-4">
-                    {{ field.label(class="form-control-label-sm col-md-2") }}
-                    <button id="photo_button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#cameraModal" onclick="showCamera()">
-                        <i class="fas fa-camera"></i>
-                    </button>
-                    {{ field(class="") }}
-                    {% if field.errors %}
-                        {% for error in field.errors %}
-                            <span class="text-danger">{{ error }}</span></br>
-                        {% endfor %}
-                    {% endif %}
-                </div>
+              <div class="form-row">
+                <!-- <div class="col-md-12"> -->
+                {{ render_file_field(form.picture, camera=True, filename=form.picture.data, folder='/PLACEHOLDER/') }}
+                {% include '_camera_modal.html' %}
+              </div>
 
             {% elif field.type=='SubmitField' %}
                 <div class="form-row mt-4">
@@ -102,42 +130,3 @@
         {% endfor %}
     </fieldset>
 </form>
-
-<style>
-  .on-top{
-    position: absolute;
-    top:0;bottom:0;right:0;left:0;
-    z-index: 2000;
-  }
-</style>
-
-<!-- Camera Modal -->
-<div class="modal fade" id="cameraModal" tabindex="-1" role="dialog" aria-labelledby="cameraModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="cameraModalLabel">Take Photo</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="photo-modal-body">
-        <div  class="embed-responsive embed-responsive-1by1"  id="videoContainer">
-          <video class="embed-responsive-item border-dark rounded" autoplay="true" id="videoElement"></video>
-          <canvas id="crosshairCanvas" class="w-100 h-100 m-auto on-top" onclick="showResult()"></canvas>
-          <canvas id="resultCanvas" class="h-100 m-auto border border-dark rounded on-top" hidden="true" onclick="showCamera()"></canvas>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="snap" class="btn btn-secondary float-left"><i class="fas fa-camera"></i></button>
-        <button id="retake" class="btn btn-secondary" hidden="true"><i class="fas fa-trash"></i></button>
-        <button id="mirror" class="btn btn-secondary" data-toggle="button" aria-pressed="true"><i class="fas fa-arrows-alt-h"></i></button>
-        <button id="flip" class="btn btn-secondary" data-toggle="button" aria-pressed="true"><i class="fas fa-sync-alt"></i></button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script type="text/javascript"> {% include 'form_functions.js' %} </script>
