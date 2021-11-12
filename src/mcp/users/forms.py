@@ -19,6 +19,8 @@ try:
 except ImportError:
     groups_imported = False
 
+from mcp.users.utils import save_picture
+
 useHtml5Fields = True
 if useHtml5Fields:
     from wtforms.fields.html5 import DateField
