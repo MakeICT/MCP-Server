@@ -5,7 +5,7 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (StringField, PasswordField, SubmitField, BooleanField,
-                     DateField, SelectMultipleField)
+                     DateField, SelectMultipleField, HiddenField)
 
 
 from wtforms.validators import (DataRequired, Length, Email, EqualTo,
@@ -81,6 +81,7 @@ class UpdateAccountForm(FlaskForm):
     active = BooleanField('Active')
     picture = FileField('Profile Picture',
                         validators=[FileAllowed(['jpg', 'png'])])
+    camera_data = HiddenField('Camera Data')
     background_check_date = DateField('Background Check', validators=[Optional()])
     nfc_id = StringField('NFC ID')
 
@@ -119,12 +120,16 @@ class UpdateAccountForm(FlaskForm):
         self.birthdate.data = user.birthdate
         self.nfc_id.data = user.nfc_id
         self.active.data = user.active
+        self.picture.data = user.image_file
         self.background_check_date.data = user.background_check_date
 
     def fill_user(self, user):
         original_user = copy.copy(user)
         if self.picture.data:
             picture_file = save_picture(self.picture.data)
+            user.image_file = picture_file
+        elif self.camera_data.data:
+            picture_file = save_picture(self.camera_data.data)
             user.image_file = picture_file
         user.username = self.username.data
         user.email = self.email.data
