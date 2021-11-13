@@ -10,16 +10,16 @@
         {% endif %}
         {% if camera %}
           <div class="input-group-append">
-            <a id="photo_button" type="button" class="btn btn-secondary btn-sm fas fa-camera text-white" style="line-height: 1.5" data-toggle="modal" data-target="#cameraModal""></a>
+            <a id="photo_button" type="button" class="btn btn-secondary btn-sm fas fa-camera text-white" style="line-height: 1.5" data-toggle="modal" data-target="#cameraModal" onclick="setFieldId('{{ field.id }}')"></a>
           </div>
         {% endif%}
         {% if filename%}
           <div class="input-group-append">
-            <a id="{{ field.id + '_down_btn' }}" type="button" href="{{ url_for('static', filename= folder + filename)}}" download class="btn btn-secondary btn-sm fas fa-file-download" style="line-height: 1.5"></a>
+            <a id="{{ field.id + '_down_btn' }}" type="button" href="{{ url_for('static', filename= folder + filename)}}" download class="btn btn-secondary btn-sm border-left fas fa-file-download" style="line-height: 1.5"></a>
           </div>
         {% endif %}
           <div class="input-group-append">
-            <button id="{{ field.id + '_btn' }}" type="button" onclick="document.getElementById('{{ field.id }}').click();" class="btn btn-primary btn-sm rounded-right fas fa-file-upload"></button>
+            <button id="{{ field.id + '_btn' }}" type="button" onclick="document.getElementById('{{ field.id }}').click();" class="btn btn-primary btn-sm border-left rounded-right fas fa-file-upload"></button>
           </div>
         {% if field.errors %} 
           <div class="invalid-feedback mt-0 pt-0">
