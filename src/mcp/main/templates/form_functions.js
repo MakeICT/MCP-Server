@@ -10,6 +10,7 @@ const file_field = {
   retakeButton: document.getElementById("retake"),
   mirrorButton: document.getElementById("mirror"),
   flipButton: document.getElementById("flip"),
+  saveButton: document.getElementById("save"),
   x:0,
   y:0,
   crop_height: 600,
@@ -73,9 +74,15 @@ function showResult(ff) {
   ff.resultCanvas.height = ff.crop_height;
 
   resultContext.drawImage(ff.video, ff.x, ff.y, ff.crop_width, ff.crop_height, 0, 0, ff.crop_width, ff.crop_height);
+}
 
+function saveResult(ff) {
   var dataURL = ff.resultCanvas.toDataURL("image/png");
-  // console.log(dataURL);s
+  var camDataField = document.getElementById("camera_data");
+  camDataField.value = dataURL;
+
+  file_field.filenameField.innerHTML = "camera_snapshot.png";
+  console.log(camDataField.value);
 }
 
 function showCamera(ff) {
@@ -174,6 +181,10 @@ file_field.resultCanvas.addEventListener('click', function() {
   showCamera(file_field);
 });
 
+file_field.saveButton.addEventListener('click', function() {
+  saveResult(file_field);
+  $('#cameraModal').modal("hide");
+});
 // Set up camera
 file_field.cameraModalButton.addEventListener('click', function() {
   setupCamera(file_field);
