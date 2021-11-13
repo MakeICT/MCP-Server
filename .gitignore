@@ -1,5 +1,5 @@
 mcp/site.db
-mcp/static/profile_pics/*
+src/mcp/static/profile_pics/*
 config.ini
 
 /logs/
