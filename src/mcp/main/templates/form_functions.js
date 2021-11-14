@@ -1,7 +1,11 @@
 const file_field = {
+  fieldId: "{{ field.id }}",
+  filenameField: document.getElementById("{{ field.id }}" + '_fn'),
+  originalFilename: "{{ filename }}",
   video: document.getElementById("videoElement"),
   frontCamera: false,
   cameraCount: 0,
+  photoSaved: false,
   resultCanvas: document.getElementById('resultCanvas'),
   crosshairCanvas: document.getElementById('crosshairCanvas'),
   videoContainer: document.getElementById('videoContainer'),
@@ -18,6 +22,12 @@ const file_field = {
 };
 
 // let fileFieldInst = new file_field();
+
+function setFieldId(fieldId) {
+  file_field.fieldId = fieldId;
+  file_field.filenameField = document.getElementById(fieldId + '_fn');
+  console.log("Field ID:", file_field.fieldId);
+}
 
 function setupCrosshair(ff) {
   var crosshairContext = ff.crosshairCanvas.getContext('2d');
@@ -81,8 +91,9 @@ function saveResult(ff) {
   var camDataField = document.getElementById("camera_data");
   camDataField.value = dataURL;
 
-  file_field.filenameField.innerHTML = "camera_snapshot.png";
-  console.log(camDataField.value);
+  ff.filenameField.innerHTML = "camera_snapshot.png";
+  ff.photoSaved = true;
+  // console.log(camDataField.value);
 }
 
 function showCamera(ff) {
@@ -91,6 +102,10 @@ function showCamera(ff) {
   ff.resultCanvas.hidden = true;
   ff.snapshotButton.hidden = false;
   ff.retakeButton.hidden = true;
+  var camDataField = document.getElementById("camera_data");
+  camDataField.value = null;
+  ff.filenameField.innerHTML = ff.originalFilename;
+  ff.photoSaved = false;
 }
 
 function setupCamera(ff) {
@@ -212,6 +227,8 @@ file_field.flipButton.addEventListener('click', function() {
 // Close video stream when modal is hidden
 $('#cameraModal').on('hidden.bs.modal', function () {
   console.log("Camera modal closed");
+  if(!file_field.photoSaved)
+    showCamera(file_field);
   releaseCamera(file_field);
 });
 
