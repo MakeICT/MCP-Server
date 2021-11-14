@@ -26,6 +26,8 @@ redis = "*"
 rq = "*"
 email-validator = "*"
 wtforms = "~=2.3"
+bs4 = "*"
+qrcode = "*"
 
 [requires]
 python_version = "3"
