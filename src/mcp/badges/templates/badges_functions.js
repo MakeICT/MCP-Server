@@ -21,13 +21,44 @@ function download_badge_svg(svg_element) {
   // document.body.removeChild(downloadLink);
 }
 
-function printElement(e) {
+function printBadgeSVG(svg) {
   var ifr = document.createElement('iframe');
-  ifr.style='height: 0px; width: 0px; position: absolute'
+  ifr.width = 600;
+  ifr.height = 600;
+
+  ifr.onload = function () {
+    // console.log("Loaded!");
+    ifr.hidden = true;
+    var print_style = document.createElement('style');
+    var styles = 
+    `@media print {
+      *{
+        margin: 0;
+        padding:0;
+      }
+      @page {
+        size: 2.12in 3.38in;
+        position: absolute;
+        top:0px;bottom:0;right:0;left:0;
+        margin: 0;
+      }
+      html {
+        width: 100%;
+        height: 100%;
+      }
+      svg {
+        position: absolute;
+        bottom:0;
+      } 
+    }";`
+    
+    print_style.appendChild(document.createTextNode(styles));
+    ifr.contentDocument.head.appendChild(print_style);
+    $(svg).clone().appendTo(ifr.contentDocument.body);
+    ifr.contentWindow.onafterprint = function() {
+      ifr.parentElement.removeChild(ifr);
+    }
+    ifr.contentWindow.print();
+  }
   document.body.appendChild(ifr);
-
-  $(e).clone().appendTo(ifr.contentDocument.body);
-  ifr.contentWindow.print();
-
-  ifr.parentElement.removeChild(ifr);
 }
