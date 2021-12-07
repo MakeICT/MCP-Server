@@ -30,8 +30,31 @@
         {% endif %}
       </div>
     </div>
-    <script type="text/javascript"> {% include 'form_functions.js' %} </script>  
-{%- endmacro %}
+    <script type="text/javascript"> {% include 'form_functions.js' %} </script> 
+{% endmacro %}
+
+{% macro render_string_field(field, label_visible=true, append_button={}) %}
+<div class="p-0">
+    <div class="input-group input-group-sm">
+        {{ field.label(class="form-control-label-sm col-md-2 p-0") }}
+        {% if field.errors %}
+        {{ field(class="form-control form-control-sm col-md-10 rounded-left is-invalid") }}
+        <div class="invalid-feedback mt-0 pt-0">
+            {% for error in field.errors %}
+            <span class="float-right col-md-10 pl-1">{{ error }}</span>
+            {% endfor %}
+            </div>
+            {% else %}
+            {{ field(id=field.id, class="form-control form-control-sm col-md-10 rounded-left m-0") }}
+            {% if append_button %}
+                <div class="input-group-append">
+                <button id="{{ field.id + '_btn' }}" type="button" onclick="{{append_button['onclick']}}" class="btn btn-primary btn-sm border-left rounded-right fas {{ append_button['icon'] }}"></button>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
 
 <form  method="POST" action="" enctype="multipart/form-data" autocomplete="off">
     {{ form.hidden_tag() }}
@@ -41,20 +64,14 @@
             <!-- {{ field.type }} -->
             {% if field.type=='HiddenField' %}
               {{ field() }}
+
             {% elif field.type=='StringField' %}
-                <div class="form-row">
-                    {{ field.label(class="form-control-label-sm col-md-2") }}
-                    {% if field.errors %}
-                        {{ field(class="form-control form-control-sm col-md-10 is-invalid") }}
-                        <div class="invalid-feedback mt-0 pt-0">
-                            {% for error in field.errors %}
-                                <span class="float-right col-md-10 pl-1">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ field(class="form-control form-control-sm col-md-10") }}
-                    {% endif %}
-                </div>
+                {% if field.id=='nfc_id' or field.id=='query' %}
+                    <script type="text/javascript"> {% include 'badges_functions.js' %} </script> 
+                    {{ render_string_field(field, append_button={'icon':'fa-id-badge', 'onclick':"scanBadge('"+field.id+"')"}) }}
+                {% else %}
+                    {{ render_string_field(field) }}
+                {% endif %}
 
             {% elif field.type=='IntegerField' %}
                 <div class="form-row">

@@ -62,3 +62,32 @@ function printBadgeSVG(svg) {
   }
   document.body.appendChild(ifr);
 }
+
+async function scanBadge(resultFieldId) {
+    console.log("User clicked scan button");
+    console.log(resultFieldId);
+    resultField = document.getElementById(resultFieldId);
+    resultField.value = "<< Scan Badge Now >>";
+
+    try {
+      const ndef = new NDEFReader();
+      await ndef.scan();
+      console.log("> Scan started");
+      
+      ndef.addEventListener("readingerror", () => {
+        console.log("Argh! Cannot read data from the NFC tag. Try another one?");
+        resultField.value = "!! Read Error: Try Again !!";
+      });
+      
+      ndef.addEventListener("reading", ({ message, serialNumber }) => {
+        console.log(`> Serial Number: ${serialNumber}`);
+        console.log(`> Records: (${message.records.length})`);
+        resultField.value = serialNumber.split(':').join('').padStart(16, '0');
+
+        // ndef.removeEventListener(this);
+    });
+    } catch (error) {
+      console.log("Argh! " + error);
+      resultField.value = "!! Not Supported !!";
+    }
+}
