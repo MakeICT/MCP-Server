@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 pylint = "*"
+ptvsd = "*"
+debugpy = "*"
 
 [packages]
 Flask = "*"
@@ -28,6 +30,8 @@ email-validator = "*"
 wtforms = "~=2.3"
 bs4 = "*"
 qrcode = "*"
+lxml = "*"
+
 
 [requires]
 python_version = "3"
