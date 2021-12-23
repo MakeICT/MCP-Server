@@ -3,6 +3,7 @@ import logging
 from logging.handlers import RotatingFileHandler, SMTPHandler
 from redis import Redis
 import rq
+from werkzeug.debug import DebuggedApplication
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +17,17 @@ from flask_sockets import Sockets
 
 from mcp.config import Config
 
+if os.getenv("REMOTE_DEBUGGER"):
+    import multiprocessing
+
+    if multiprocessing.current_process().pid > 1:
+        import debugpy
+
+        debugpy.listen(("0.0.0.0", 10001))
+        print("⏳ Debugger can now be attached ⏳", flush=True)
+        if os.getenv("WAIT_FOR_DEBUGGER"):
+            debugpy.wait_for_client()
+            print("🎉 Debugger attached 🎉", flush=True)
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -30,6 +42,9 @@ user_manager = None  # FIXME: this could probably be done better?
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    if app.debug:
+        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True, pin_security=False)
 
     db.init_app(app)
     ma.init_app(app)
