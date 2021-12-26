@@ -232,6 +232,10 @@ $('#cameraModal').on('hidden.bs.modal', function () {
   releaseCamera(file_field);
 });
 
+function setFilename(filename) {
+  document.getElementById(file_field.fieldId + '_fn').innerHTML = filename;
+}
+
 function syncFilename(fileFieldId) {
   var doc = document.getElementById(fileFieldId).files[0].name;
   document.getElementById(fileFieldId + '_fn').innerHTML = doc;
