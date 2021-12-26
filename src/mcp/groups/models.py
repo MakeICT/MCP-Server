@@ -24,7 +24,7 @@ class Group(BaseModel):
 
     # Relationships
     users = db.relationship('User', secondary=user_group, lazy='subquery',
-                            backref=db.backref('groups', lazy=True))
+                            backref=db.backref('groups', lazy=False))
 
     def __repr__(self):
         return(f"Group('{self.name}')")
