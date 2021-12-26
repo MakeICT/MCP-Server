@@ -2,7 +2,7 @@
 import os
 from io import BytesIO
 from flask.scaffold import F
-from lxml import etree
+# from lxml import etree
 from bs4 import BeautifulSoup
 import base64
 from qrcode import QRCode
