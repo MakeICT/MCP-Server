@@ -1,6 +1,7 @@
 from datetime import datetime
 import copy
 
+from flask import current_app
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
@@ -145,10 +146,10 @@ class UpdateAccountForm(FlaskForm):
             user.background_check_date = datetime.combine(self.background_check_date.data, datetime.min.time())
         
         if user == original_user:
-            print("No changes")
+            current_app.logger.debug(f"No changes to user {user.Id}")
         else:
             user.set_updated_date()
-            print("Change detected")
+            current_app.logger.debug(f"Change detected for user {user.Id}")
 
 class RequestResetForm(FlaskForm):
     email = StringField('Email',
