@@ -12,7 +12,7 @@ from mcp.users.utils import save_picture
 from mcp.groups.models import Group
 from mcp.config import Config
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from werkzeug.exceptions import BadRequestKeyError
 
 
@@ -109,9 +109,16 @@ def adm_users():
         qfilter = request.args.get('filter')
 
     if qfilter:
-        users = User.query.filter(or_(User.email.like('%'+qfilter+'%'),
-                                      User.first_name.like('%'+qfilter+'%'),
-                                      User.last_name.like('%'+qfilter+'%'),)) \
+        qs = qfilter.split()
+        search_fields = [User.email, User.first_name, User.last_name, User.nfc_id]
+        conditions = []
+        # build SQL query filter. will return entries where each string in the
+        # filter matches one of the search fields
+        for q in qs:
+            conditions.append(or_(*[field.like('%'+q+'%') for field in search_fields]))
+        conditions = and_(*conditions)
+        print(conditions)
+        users = User.query.filter(conditions) \
                 .order_by(User.last_name.asc()).paginate(page, 100, False)
     else:
         users = User.query.order_by(User.last_name.asc()).paginate(page, 20, False)
