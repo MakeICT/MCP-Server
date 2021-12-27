@@ -23,8 +23,14 @@ if os.getenv("REMOTE_DEBUGGER"):
     if multiprocessing.current_process().pid > 1:
         import debugpy
 
-        debugpy.listen(("0.0.0.0", 10001))
-        print("⏳ Debugger can now be attached ⏳", flush=True)
+        port = 10001
+        while True:
+            try:
+                debugpy.listen(("0.0.0.0", port))
+                break
+            except RuntimeError:
+                port += 1
+        print(f"⏳ Debugger can now be attached on port {port}⏳", flush=True)
         if os.getenv("WAIT_FOR_DEBUGGER"):
             debugpy.wait_for_client()
             print("🎉 Debugger attached 🎉", flush=True)
