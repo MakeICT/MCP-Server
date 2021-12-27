@@ -1,6 +1,41 @@
+{% macro render_field(field, label_visible=true, right_url=None, right_label=None, prepend=None, append=None, append_button={}) -%}
+  <div class="form-group">
+    {{ field.label(class="form-control-label mb-0") }}
+    <div class="input-group input-group-sm"> 
+      {% if prepend %}
+        <div class="input-group-prepend">
+          <span class="input-group-text">{{ prepend }}</span>
+        </div>
+      {% endif %} 
+      {% if field.errors %} 
+          {{ field(class="form-control form-control-sm is-invalid") }}
+      {% else %} 
+          {{ field(class="form-control form-control-sm") }} 
+      {% endif %}
+      {% if append %}
+      <div class="input-group-append">
+         <span class="input-group-text">{{ append }}</span>
+      </div>
+      {% endif %}
+      {% if append_button %}
+      <div class="input-group-append">
+      <button id="{{ field.id + '_btn' }}" type="button" onclick="{{append_button['onclick']}}" class="btn btn-primary btn-sm border-left rounded-right fas {{ append_button['icon'] }}"></button>
+      </div>
+      {% endif %}
+      {% if field.errors %}
+      <div class="invalid-feedback mt-0 pt-0">
+        {% for error in field.errors %} 
+          <span class="float-right">{{ error }}</span> 
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{%- endmacro %}
+
 {% macro render_file_field(field, label_visible=true, filename=None, folder='', right_url=None, right_label=None, camera=False) -%}{% include '_camera_modal.html' %}
-    {{ field.label(class="form-control-label-sm col-md-2") }}
-    <div class="col-md-10 p-0">
+    {{ field.label(class="form-control-label mb-0") }}
+    <div class="form-group p-0">
       <div class="input-group input-group-sm">
         {{ field(style='display:none', onchange="syncFilename(\'" + field.id +"\')") }} 
         {% if field.errors %} 
@@ -33,110 +68,37 @@
     <script type="text/javascript"> {% include 'form_functions.js' %} </script> 
 {% endmacro %}
 
-{% macro render_string_field(field, label_visible=true, append_button={}) %}
-<div class="p-0">
-    <div class="input-group input-group-sm">
-        {{ field.label(class="form-control-label-sm col-md-2 p-0") }}
-        {% if field.errors %}
-        {{ field(class="form-control form-control-sm col-md-10 rounded-left is-invalid") }}
-        <div class="invalid-feedback mt-0 pt-0">
-            {% for error in field.errors %}
-            <span class="float-right col-md-10 pl-1">{{ error }}</span>
-            {% endfor %}
-            </div>
-            {% else %}
-            {{ field(id=field.id, class="form-control form-control-sm col-md-10 rounded-left m-0") }}
-            {% if append_button %}
-                <div class="input-group-append">
-                <button id="{{ field.id + '_btn' }}" type="button" onclick="{{append_button['onclick']}}" class="btn btn-primary btn-sm border-left rounded-right fas {{ append_button['icon'] }}"></button>
-                </div>
-            {% endif %}
-        {% endif %}
-    </div>
-</div>
-{% endmacro %}
-
 <form  method="POST" action="" enctype="multipart/form-data" autocomplete="off">
     {{ form.hidden_tag() }}
     <fieldset class="form-group">
-        <legend class="border-bottom mb-4">{{ title }}</legend>
+        <!-- <legend class="border-bottom mb-4">{{ title }}</legend> -->
         {% for field in form %}
             <!-- {{ field.type }} -->
             {% if field.type=='HiddenField' %}
               {{ field() }}
-
-            {% elif field.type=='StringField' %}
-                {% if field.id=='nfc_id' or field.id=='query' %}
-                    <script type="text/javascript"> {% include 'badges_functions.js' %} </script> 
-                    {{ render_string_field(field, append_button={'icon':'fa-id-badge', 'onclick':"scanBadge('"+field.id+"')"}) }}
-                {% else %}
-                    {{ render_string_field(field) }}
-                {% endif %}
-
-            {% elif field.type=='IntegerField' %}
-                <div class="form-row">
-                    {{ field.label(class="form-control-label-sm col-md-2") }}
-                    {% if field.errors %}
-                        {{ field(class="form-control form-control-sm col-md-10 is-invalid") }}
-                        <div class="invalid-feedback mt-0 pt-0">
-                            {% for error in field.errors %}
-                                <span class="float-right col-md-10 pl-1">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ field(class="form-control form-control-sm col-md-10") }}
-                    {% endif %}
-                </div>
-
-            {% elif field.type=='BooleanField' %}
-                <div class="form-row">
-                    {{ field.label(class="form-control-label-sm col-md-2") }}
-                    {% if field.errors %}
-                        {{ field(class="form-control form-control-sm col-md-10 is-invalid") }}
-                        <div class="invalid-feedback mt-0 pt-0">
-                            {% for error in field.errors %}
-                                <span class="float-right col-md-10 pl-1">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ field(class="") }}
-                    {% endif %}
-                </div>
-
-            {% elif field.type=='DateField' %}
-                <div class="form-row">
-                    {{ field.label(class="form-control-label-sm col-md-2") }}
-                    {% if field.errors %}
-                        {{ field(class="form-control form-control-sm col-md-10 is-invalid") }}
-                        <div class="invalid-feedback mt-0 pt-0">
-                            {% for error in field.errors %}
-                                <span class="float-right col-md-10 pl-1">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ field(class="form-control form-control-sm col-md-10") }}
-                    {% endif %}
-                </div>
-
+ 
             {% elif field.type=='SelectMultipleField' %}
-                <div class="form-row">
-                    {{ field.label(class="form-control-label-sm col-md-2") }}
-                    {% if field.errors %}
-                        {{ field(div_class="col-md-10 is-invalid") }}
-                        <div class="invalid-feedback mt-0 pt-0">
-                            {% for error in field.errors %}
-                                <span class="float-right col-md-10 pl-1">{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ field(div_class="col-md-10") }}
-                    {% endif %}
+            <div class="form-row">
+                <div class="col-md-12">
+                {{ field.label(class="form-control-label") }}
+                {% if field.errors %}
+                    {{ field(div_class="col-md-10 is-invalid") }}
+                    <div class="invalid-feedback mt-0 pt-0">
+                        {% for error in field.errors %}
+                            <span class="float-right col-md-10 pl-1">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ field(div_class="").replace("auth_", '') }}
+                {% endif %}
                 </div>
+            </div>
 
             {% elif field.type=='FileField' %}
               <div class="form-row">
-                <!-- <div class="col-md-12"> -->
-                {{ render_file_field(form.picture, camera=True, filename=form.picture.data, folder='/profile_pics/') }}
+                <div class="col-md-12">
+                    {{ render_file_field(form.picture, camera=True, filename=form.picture.data, folder='/profile_pics/') }}
+                </div>
                 {% include '_camera_modal.html' %}
               </div>
 
@@ -145,6 +107,18 @@
                     {{ form.submit(class="btn btn-primary") }}
                 </div>
             {% elif field.type=='CSRFTokenField' %}
+
+            {% else %}
+            <div class="row">
+                <div class="col-md-12">
+                    {% if field.id=='nfc_id' or field.id=='query' %}
+                        <script type="text/javascript"> {% include 'badges_functions.js' %} </script> 
+                        {{ render_field(field, append_button={'icon':'fa-id-badge', 'onclick':"scanBadge('"+field.id+"')"}) }}
+                    {% else %}
+                        {{ render_field(field) }}
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
         {% endfor %}
     </fieldset>
