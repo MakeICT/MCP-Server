@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+ flask:
+  build:
+   context: .
+  image: mcp-server-master
+  entrypoint: "./boot.sh"
+  depends_on:
+  - "mysqldb"
+
+ mysqldb:
+  image: mariadb:10.7.1-focal
+  # command: '--default-authentication-plugin=mysql_native_password'
+  ports:
+  - 3306:3306
+  environment:
+  - MYSQL_USER=mcp_user
+  - MYSQL_DATABASE=master_control_program
+  # - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db-password
+  # secrets:
+  # - db-password
+  volumes:
+  - mysql:/var/lib/mysql
+  - mysql_config:/etc/mysql
+
+ redis:
+  image: "redis:alpine"
+
+ rqworker:
+  image: mcp-server-master
+  working_dir: /home/mcp/src
+  command: rq worker --url redis://redis:6379 mcp-tasks
+  depends_on:
+  - "redis"
+  - "flask"
+
+secrets:
+  db-password:
+    file: db/password.txt
+
+volumes:
+  mysql:
+  mysql_config:

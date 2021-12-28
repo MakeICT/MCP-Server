@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+ flask:
+  ports:
+  - 5000:5000
+  - 5678:5678
+  - 10001:10001
+  volumes:
+  - ./:/home/mcp
+  environment:
+  - FLASK_ENV=development
+  - TEMPLATES_AUTO_RELOAD=True
+  # - DATABASE_URL=mysql+pymysql://mcp_user:mcp_password@mysqldb_dev:3306/master_control_program
+  - GEVENT_SUPPORT=True
+  - PYTHONUNBUFFERED=1
+  - PYTHONDONTWRITEBYTECODE=1
+  - REMOTE_DEBUGGER=1
+  # - WAIT_FOR_DEBUGGER=1
+  depends_on:
+  - "mysqldb"
+
+ mysqldb:
+  environment:
+  - MYSQL_ROOT_PASSWORD=p@ssw0rd1
+  - MYSQL_PASSWORD=mcp_password
+  - MYSQL_DATABASE=master_control_program
+ 
