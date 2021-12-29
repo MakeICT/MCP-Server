@@ -5,6 +5,7 @@ import sys
 
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from sqlalchemy.dialects.mysql import DOUBLE
 
 from flask import current_app
 from flask_user import UserMixin
@@ -160,7 +161,7 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    timestamp = db.Column(db.Float(precision=15), index=True, default=time)
+    timestamp = db.Column(DOUBLE, index=True, default=time)
     payload_json = db.Column(db.Text)
 
     def get_data(self):
